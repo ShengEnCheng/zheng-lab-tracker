@@ -1,0 +1,3658 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>鄭老師研究室｜實驗管理與收案示警儀表板</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #0f172a;
+      --ink-light: #334155;
+      --muted: #64748b;
+      --line: #cbd5e1;
+      --soft-line: #e2e8f0;
+      --surface: #ffffff;
+      --canvas: #f8fafc;
+      --navy: #0f172a;
+      --blue: #2563eb;
+      --blue-hover: #1d4ed8;
+      --blue-soft: #eff6ff;
+      --blue-border: #bfdbfe;
+      --green: #15803d;
+      --green-soft: #f0fdf4;
+      --green-border: #86efac;
+      --amber: #b45309;
+      --amber-soft: #fefce8;
+      --amber-border: #fde047;
+      --red: #b91c1c;
+      --red-soft: #fef2f2;
+      --red-border: #fca5a5;
+      --purple: #6d28d9;
+      --purple-soft: #ede9fe;
+      --indigo: #4338ca;
+      --slate: #475569;
+      --slate-soft: #f1f5f9;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.07), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font-size: 13.5px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    .app-header {
+      background: #0f172a;
+      color: #fff;
+      border-bottom: 1px solid #1e293b;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+    }
+    .header-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: #fff;
+      font-weight: 800;
+      font-size: 19px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 3px 10px rgba(59, 130, 246, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      color: #f8fafc;
+    }
+    .brand-sub {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .header-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.28);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      user-select: none;
+    }
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: live-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    }
+    @keyframes live-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      50% { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+    }
+    .date-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #1e293b;
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      font-size: 12px;
+      color: #e2e8f0;
+    }
+    .date-control input[type="date"] {
+      background: #0f172a;
+      color: #fff;
+      border: 1px solid #475569;
+      border-radius: 5px;
+      padding: 3px 7px;
+      font: inherit;
+      font-weight: 600;
+    }
+    .date-control input[type="date"]:focus {
+      outline: none;
+      border-color: #38bdf8;
+    }
+    .btn-group-primary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-group-util {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-left: 1px solid #334155;
+      padding-left: 10px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 13px;
+      border-radius: 7px;
+      font: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+      user-select: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #1d4ed8, #1e40af);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.35);
+    }
+    .btn-success {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(22, 163, 74, 0.25);
+    }
+    .btn-success:hover {
+      background: linear-gradient(135deg, #15803d, #166534);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(22, 163, 74, 0.35);
+    }
+    .btn-indigo {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(79, 70, 229, 0.25);
+    }
+    .btn-indigo:hover {
+      background: linear-gradient(135deg, #4338ca, #3730a3);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(79, 70, 229, 0.35);
+    }
+    .btn-secondary {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-color: #475569;
+    }
+    .btn-secondary:hover {
+      background: #334155;
+      color: #fff;
+      border-color: #64748b;
+    }
+    .btn-light {
+      background: #fff;
+      color: var(--ink-light);
+      border-color: var(--line);
+    }
+    .btn-light:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+      color: var(--ink);
+    }
+    .btn-danger-outline {
+      background: #fff;
+      color: var(--red);
+      border-color: var(--red-border);
+    }
+    .btn-danger-outline:hover {
+      background: var(--red-soft);
+      border-color: var(--red);
+    }
+    .btn-xs {
+      padding: 3px 8px;
+      font-size: 11.5px;
+      border-radius: 5px;
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 22px 24px 56px;
+    }
+
+    /* Rules & Filter Banner */
+    .filter-bar {
+      background: var(--surface);
+      border: 1px solid var(--soft-line);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+    .filter-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink-light);
+    }
+    .filter-item select, .filter-item input[type="search"] {
+      padding: 6px 11px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      font: inherit;
+      font-size: 12.5px;
+      color: var(--ink);
+      transition: all 0.15s ease;
+    }
+    .filter-item select:focus, .filter-item input[type="search"]:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--soft-line);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      border-top: 4px solid var(--blue);
+      cursor: pointer;
+      transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.16s ease, border-color 0.16s ease;
+      position: relative;
+    }
+    .summary-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--line);
+    }
+    .summary-card.active-filter {
+      box-shadow: 0 0 0 2px var(--blue), var(--shadow-md);
+      background: #f8fafc;
+    }
+    .summary-card.overdue {
+      border-top-color: #dc2626;
+      background: linear-gradient(180deg, rgba(254, 242, 242, 0.7) 0%, #ffffff 65%);
+    }
+    .summary-card.red {
+      border-top-color: #ef4444;
+      background: linear-gradient(180deg, rgba(254, 226, 226, 0.7) 0%, #ffffff 65%);
+    }
+    .summary-card.amber {
+      border-top-color: #f59e0b;
+      background: linear-gradient(180deg, rgba(254, 243, 199, 0.7) 0%, #ffffff 65%);
+    }
+    .summary-card.green {
+      border-top-color: #10b981;
+      background: linear-gradient(180deg, rgba(240, 253, 244, 0.7) 0%, #ffffff 65%);
+    }
+    .summary-card.done {
+      border-top-color: #0284c7;
+      background: linear-gradient(180deg, rgba(240, 249, 255, 0.7) 0%, #ffffff 65%);
+    }
+    .summary-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .summary-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      color: var(--ink-light);
+    }
+    .summary-icon {
+      font-size: 14px;
+    }
+    .summary-action-badge {
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--muted);
+      letter-spacing: 0.01em;
+    }
+    .summary-value {
+      font-size: 32px;
+      font-weight: 800;
+      margin: 8px 0 4px;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+    }
+    .summary-note {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* Navigation Tabs */
+    .view-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: #e2e8f0;
+      padding: 6px;
+      border-radius: var(--radius-md);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+    }
+    .tab-btn {
+      padding: 8px 15px;
+      border-radius: 8px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: #475569;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.6);
+      color: var(--ink);
+    }
+    .tab-btn.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+    }
+    .tab-count {
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      background: #cbd5e1;
+      color: #1e293b;
+      font-variant-numeric: tabular-nums;
+    }
+    .tab-btn.active .tab-count {
+      background: #2563eb;
+      color: #ffffff;
+    }
+    .tab-pill-hint {
+      font-size: 10.5px;
+      opacity: 0.75;
+      background: rgba(0, 0, 0, 0.06);
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-weight: 500;
+    }
+    .tab-btn.active .tab-pill-hint {
+      background: #f1f5f9;
+      color: #475569;
+      opacity: 1;
+    }
+
+    /* Panels */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--soft-line);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 22px;
+      overflow: hidden;
+    }
+    .panel-head {
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--soft-line);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #f8fafc;
+    }
+    .panel-title {
+      margin: 0;
+      font-size: 15.5px;
+      font-weight: 800;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-desc {
+      margin: 3px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .panel-body {
+      padding: 18px 20px;
+    }
+
+    /* Traffic Light & Status Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      display: inline-block;
+    }
+    .badge-overdue {
+      background: #450a0a;
+      color: #fecaca;
+      border-color: #dc2626;
+    }
+    .badge-red-flash {
+      background: var(--red-soft);
+      color: var(--red);
+      border: 2px solid #dc2626;
+      animation: pulse-red 1.4s infinite;
+    }
+    .badge-red {
+      background: var(--red-soft);
+      color: var(--red);
+      border-color: var(--red-border);
+    }
+    .badge-amber {
+      background: var(--amber-soft);
+      color: var(--amber);
+      border-color: var(--amber-border);
+    }
+    .badge-green {
+      background: var(--green-soft);
+      color: var(--green);
+      border-color: var(--green-border);
+    }
+    .badge-done {
+      background: #e0f2fe;
+      color: #0369a1;
+      border-color: #7dd3fc;
+    }
+    .badge-future {
+      background: var(--slate-soft);
+      color: var(--slate);
+      border-color: var(--line);
+    }
+    .student-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11.5px;
+      background: var(--blue-soft);
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+    .student-pill.s-HJ { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+    .student-pill.s-CI { background: #ede9fe; color: #5b21b6; border-color: #c4b5fd; }
+    .student-pill.s-昊 { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+    .student-pill.s-潔 { background: #fce7f3; color: #9d174d; border-color: #fbcfe8; }
+    .student-pill.s-紳 { background: #dcfce7; color: #166534; border-color: #86efac; }
+
+    @keyframes pulse-red {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.55);
+      }
+      50% {
+        box-shadow: 0 0 0 5px rgba(220, 38, 38, 0);
+      }
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      max-width: 100%;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-xs);
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+    th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      padding: 10px 11px;
+      border-bottom: 2px solid var(--line);
+      border-right: 1px solid var(--soft-line);
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--soft-line);
+      border-right: 1px solid var(--soft-line);
+      vertical-align: top;
+      white-space: nowrap;
+    }
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      background: #fff;
+      z-index: 5;
+      box-shadow: 3px 0 8px -2px rgba(15, 23, 42, 0.08);
+      font-weight: 700;
+    }
+    th.sticky-col {
+      z-index: 10;
+      background: #f1f5f9;
+    }
+    tbody tr:hover .sticky-col {
+      background: #f8fafc;
+    }
+
+    /* Milestone Cell Inside Table */
+    .ms-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 145px;
+      padding: 5px;
+      border-radius: 7px;
+      transition: background 0.15s;
+    }
+    .ms-cell.state-overdue {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+    }
+    .ms-cell.state-red-flash {
+      background: #fff1f2;
+      border: 2px solid #dc2626;
+      animation: pulse-red 1.5s infinite;
+    }
+    .ms-cell.state-red {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+    }
+    .ms-cell.state-amber {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+    }
+    .ms-cell.state-green {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+    }
+    .ms-cell.state-done {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      opacity: 0.9;
+    }
+    .ms-row-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+    .ms-date-input {
+      padding: 3px 5px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      font: inherit;
+      font-size: 11.5px;
+      color: var(--ink);
+      background: #fff;
+      width: 118px;
+      transition: border-color 0.15s ease;
+    }
+    .ms-date-input:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+    .ms-owner-input {
+      width: 52px;
+      padding: 2px 5px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      background: #fff;
+      transition: border-color 0.15s ease;
+    }
+    .ms-owner-input:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+    .ms-row-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    .toggle-done-btn {
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: var(--ink-light);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .toggle-done-btn:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+    .toggle-done-btn.is-done {
+      background: #0284c7;
+      color: #fff;
+      border-color: #0369a1;
+      box-shadow: 0 1px 3px rgba(2, 132, 199, 0.3);
+    }
+    .toggle-done-btn.is-done:hover {
+      background: #0369a1;
+    }
+    .toggle-done-btn.is-overdue {
+      background: #dc2626;
+      color: #fff;
+      border-color: #b91c1c;
+      box-shadow: 0 1px 3px rgba(220, 38, 38, 0.3);
+    }
+    .toggle-done-btn.is-overdue:hover {
+      background: #b91c1c;
+    }
+    .auto-calc-hint {
+      font-size: 10px;
+      color: var(--blue);
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    /* Student Workload Grid */
+    .student-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .student-card {
+      background: #ffffff;
+      border: 1px solid var(--soft-line);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .student-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+      border-color: var(--blue-border);
+    }
+    .student-card.active {
+      box-shadow: 0 0 0 2px var(--blue), var(--shadow);
+      background: #f8fafc;
+      border-color: var(--blue);
+    }
+    .student-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .student-card-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .student-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 14px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+    .student-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .student-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .student-name {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .student-id-tag {
+      font-size: 10.5px;
+      font-weight: 700;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 1px 5px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+    .student-role-text {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .student-filter-status {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      transition: all 0.15s ease;
+    }
+    .student-filter-status.is-active {
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-weight: 700;
+    }
+    .student-progress-wrap {
+      background: #f8fafc;
+      border: 1px solid #f1f5f9;
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .student-progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11.5px;
+      color: var(--ink-light);
+      margin-bottom: 6px;
+    }
+    .student-progress-count {
+      font-size: 11px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .student-progress-track {
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .student-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+    .student-stats {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      font-size: 11px;
+    }
+
+    /* Calendar Grid */
+    .cal-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .cal-month-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+      background: #fff;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .cal-dow {
+      background: #f1f5f9;
+      padding: 9px 8px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--ink-light);
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .cal-day {
+      min-height: 120px;
+      padding: 6px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #fff;
+      position: relative;
+    }
+    .cal-day.other-month {
+      background: #f8fafc;
+      color: #94a3b8;
+    }
+    .cal-day.is-today {
+      background: #eff6ff;
+      box-shadow: inset 0 0 0 2px #3b82f6;
+    }
+    /* Special T1-T4 Alert Day on Calendar: Thick border + Flashing effect */
+    .cal-day.has-t-alert {
+      border: 2.5px solid #dc2626 !important;
+      background: #fff5f5;
+      animation: pulse-red 1.6s infinite;
+      z-index: 1;
+    }
+    .cal-day-num {
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+    .cal-event {
+      padding: 3px 6px;
+      border-radius: 5px;
+      font-size: 11px;
+      line-height: 1.35;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      transition: transform 0.1s ease;
+    }
+    .cal-event:hover {
+      transform: translateX(1px);
+    }
+    .cal-event.ev-t-urgent {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1.5px solid #dc2626;
+      font-weight: 700;
+    }
+    .cal-event.ev-overdue {
+      background: #450a0a;
+      color: #fecaca;
+      border-left-color: #ef4444;
+    }
+    .cal-event.ev-red {
+      background: #fee2e2;
+      color: #991b1b;
+      border-left-color: #dc2626;
+    }
+    .cal-event.ev-amber {
+      background: #fef3c7;
+      color: #92400e;
+      border-left-color: #d97706;
+    }
+    .cal-event.ev-green {
+      background: #dcfce7;
+      color: #166534;
+      border-left-color: #16a34a;
+    }
+    .cal-event.ev-done {
+      background: #e0f2fe;
+      color: #0369a1;
+      border-left-color: #0284c7;
+      text-decoration: line-through;
+      opacity: 0.75;
+    }
+    .cal-event.ev-future {
+      background: #f1f5f9;
+      color: #475569;
+      border-left-color: #94a3b8;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.62);
+      backdrop-filter: blur(5px);
+      display: none;
+      place-items: center;
+      z-index: 200;
+      padding: 20px;
+    }
+    .modal-backdrop.open {
+      display: grid;
+    }
+    .modal {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      width: min(680px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      animation: modal-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modal-pop {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-head {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--soft-line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+    }
+    .modal-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .modal-body {
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-field label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-light);
+    }
+    .form-field input, .form-field select {
+      padding: 8px 11px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      font: inherit;
+      font-size: 13px;
+      transition: all 0.15s ease;
+    }
+    .form-field input:focus, .form-field select:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    .modal-foot {
+      padding: 14px 22px;
+      border-top: 1px solid var(--soft-line);
+      background: #f8fafc;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .modal-lg {
+      width: min(880px, 98%);
+      max-height: 92vh;
+    }
+    .milestone-builder-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    .milestone-builder-table th {
+      background: #f8fafc;
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #475569;
+    }
+    .milestone-builder-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--soft-line);
+      vertical-align: middle;
+    }
+    .milestone-builder-table input,
+    .milestone-builder-table select {
+      padding: 5px 8px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      font-size: 12px;
+      font-family: inherit;
+    }
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .preset-chip {
+      padding: 4px 11px;
+      background: #f1f5f9;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 11.5px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #1e40af;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .preset-chip:hover {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+    }
+    .member-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    .member-table th {
+      background: #f8fafc;
+      padding: 9px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+    }
+    .member-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--soft-line);
+      vertical-align: middle;
+    }
+    .member-table input {
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      font-size: 12px;
+    }
+
+    .rule-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 11px 15px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: #1e3a8a;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      line-height: 1.5;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1024px) {
+      .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+      .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .cal-grid { grid-template-columns: 1fr; }
+      .cal-dow { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Datalist for fast responsible owner autocomplete across all tables & modals -->
+  <datalist id="labMembersDatalist"></datalist>
+
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark">鄭</div>
+        <div>
+          <div class="brand-title">鄭老師研究室｜多案實驗管理與收案示警儀表板</div>
+          <div class="brand-sub">跨研究案（OPT_Bone、music40、自訂期程）× 學生負責人 × 自動推算與完畢勾選</div>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="status-live-pill" title="所有操作即時自動存入本機瀏覽器"><span class="live-dot"></span>本機即時儲存</div>
+        <div class="date-control" title="所有紅黃綠燈與逾期判定皆以此基準日計算">
+          <span>📅 判定基準日：</span>
+          <input type="date" id="refDateInput" value="2026-10-24">
+          <button class="btn btn-secondary btn-xs" id="resetTodayBtn" type="button">設為今日</button>
+        </div>
+        <div class="btn-group-primary">
+          <button class="btn btn-primary" id="openAddSubjectBtn" type="button">＋ 新增個案</button>
+          <button class="btn btn-success" id="openAddStudyBtn" type="button">＋ 新增研究案</button>
+          <button class="btn btn-indigo" id="openManageMembersBtn" type="button" title="管理實驗室成員與學生名冊">👥 人員名冊</button>
+        </div>
+        <div class="btn-group-util">
+          <button class="btn btn-secondary btn-xs" id="markPastDoneBtn" type="button" title="將早於基準日的所有過往日期一鍵標記為已完成">✓ 標記過往完成</button>
+          <button class="btn btn-secondary btn-xs" id="exportJsonBtn" type="button">匯出備份</button>
+          <label class="btn btn-secondary btn-xs" style="margin:0; cursor:pointer;" title="匯入已備份的 JSON 檔案">
+            匯入資料 <input type="file" id="importJsonInput" accept=".json" style="display:none;">
+          </label>
+          <button class="btn btn-secondary btn-xs" id="resetDefaultBtn" type="button" title="還原為 Excel 原始個案資料">還原預設</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Global Filter Bar -->
+    <section class="filter-bar" aria-label="篩選條件">
+      <div class="filter-group">
+        <div class="filter-item">
+          <label for="studentFilter">👤 負責學生：</label>
+          <select id="studentFilter">
+            <option value="ALL">全部學生</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label for="studyFilter">📑 研究案：</label>
+          <select id="studyFilter">
+            <option value="ALL">全部研究案</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label for="statusFilter">🚦 示警狀態：</label>
+          <select id="statusFilter">
+            <option value="ALL">全部狀態</option>
+            <option value="ACTION_NEEDED">所有待辦示警 (逾期+紅+黃+綠)</option>
+            <option value="OVERDUE">逾期未完成</option>
+            <option value="RED_T">T1~T4 收案急件 (≤2天閃燈)</option>
+            <option value="RED">紅燈 (1週內 / ≤7天)</option>
+            <option value="AMBER">黃燈 (2~3週內)</option>
+            <option value="GREEN">綠燈 (3週前提醒)</option>
+            <option value="DONE">已完成 ✓</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <input type="search" id="keywordSearch" placeholder="🔍 搜尋受試者編號 (如 S01, S19) 或姓名...">
+        </div>
+      </div>
+      <div style="font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px;">
+        <span>💾</span> 所有更動自動儲存於瀏覽器，可隨時匯出 JSON 分享。
+      </div>
+    </section>
+
+    <!-- Summary KPI Cards -->
+    <section class="summary-grid" aria-label="示警統計摘要">
+      <article class="summary-card overdue" data-filter="OVERDUE" title="點擊快速篩選逾期項目">
+        <div class="summary-label">
+          <span class="summary-title"><span class="summary-icon">⚠️</span>逾期未完成</span>
+          <span class="summary-action-badge">點擊篩選</span>
+        </div>
+        <div class="summary-value" id="kpiOverdue">0</div>
+        <div class="summary-note">已過預定日且尚未勾選完成</div>
+      </article>
+      <article class="summary-card red" data-filter="RED" title="點擊快速篩選紅燈急件">
+        <div class="summary-label">
+          <span class="summary-title"><span class="summary-icon">🔴</span>紅燈急件 (含 T點前2天)</span>
+          <span class="summary-action-badge">緊急待辦</span>
+        </div>
+        <div class="summary-value" id="kpiRed">0</div>
+        <div class="summary-note">階段結束前 1 週內 ／ T1~T4 前 2 天</div>
+      </article>
+      <article class="summary-card amber" data-filter="AMBER" title="點擊快速篩選黃燈項目">
+        <div class="summary-label">
+          <span class="summary-title"><span class="summary-icon">🟡</span>黃燈預警</span>
+          <span class="summary-action-badge">準備聯絡</span>
+        </div>
+        <div class="summary-value" id="kpiAmber">0</div>
+        <div class="summary-note">OPT 前 2 週內 ／ music40 前 2~3 週</div>
+      </article>
+      <article class="summary-card green" data-filter="GREEN" title="點擊快速篩選綠燈項目">
+        <div class="summary-label">
+          <span class="summary-title"><span class="summary-icon">🟢</span>綠燈提醒</span>
+          <span class="summary-action-badge">提前留意</span>
+        </div>
+        <div class="summary-value" id="kpiGreen">0</div>
+        <div class="summary-note">OPT 前 3 週內 ／ music40 3 週以上</div>
+      </article>
+      <article class="summary-card done" data-filter="DONE" title="點擊快速篩選已完成項目">
+        <div class="summary-label">
+          <span class="summary-title"><span class="summary-icon">✅</span>已勾選完成</span>
+          <span class="summary-action-badge">已結案</span>
+        </div>
+        <div class="summary-value" id="kpiDone">0</div>
+        <div class="summary-note">已確認收案或完成評估／問卷</div>
+      </article>
+    </section>
+
+    <!-- Main View Tabs -->
+    <nav class="view-tabs" aria-label="檢視模式切換">
+      <button class="tab-btn active" data-tab="tab-action" type="button">
+        📋 學生收案待辦與示警清單 <span class="tab-count" id="tabCountAction">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-calendar" type="button">
+        📅 實驗室收案月曆 (T點閃燈提示)
+      </button>
+      <button class="tab-btn" data-tab="tab-opt-bone" type="button">
+        🦴 OPT_Bone 個案管理表 <span class="tab-pill-hint">+28天自動算</span> <span class="tab-count" id="tabCountOpt">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-music40" type="button">
+        🎵 music40 個案管理表 <span class="tab-pill-hint">初/二/三次問卷</span> <span class="tab-count" id="tabCountMusic">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-custom" type="button">
+        🧪 多期程研究案 <span class="tab-pill-hint">自訂時間點</span> <span class="tab-count" id="tabCountCustom">0</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: STUDENT ACTION BOARD -->
+    <section id="tab-action" class="tab-section">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">👩‍🔬 各學生負責人收案負擔總覽（點擊卡片可快速篩選該學生）</h2>
+            <p class="panel-desc">明確掌握哪位學生在什麼時間點需要收哪個研究案、哪個時間段的成果</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="student-cards-grid" id="studentWorkloadGrid"></div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>燈號與狀態</th>
+                  <th>負責學生</th>
+                  <th>預定日期 (倒數/逾期)</th>
+                  <th>研究案</th>
+                  <th>受試者</th>
+                  <th>需收案／評估之階段成果</th>
+                  <th>示警規則說明</th>
+                  <th>完成狀態切換 ／ 快速修改</th>
+                </tr>
+              </thead>
+              <tbody id="actionTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: INTERACTIVE CALENDAR -->
+    <section id="tab-calendar" class="tab-section hidden">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">📅 實驗室收案與評估月曆</h2>
+            <p class="panel-desc">OPT_Bone 的 T1~T4 收案日若在基準日 2 天內（或逾期未完成），月曆當日方格會顯示<strong>粗紅外框＋閃燈提示</strong></p>
+          </div>
+          <div class="cal-toolbar" style="margin:0;">
+            <button class="btn btn-light" id="calPrevBtn" type="button">◀ 上個月</button>
+            <span class="cal-month-title" id="calMonthTitle">2026 年 10 月</span>
+            <button class="btn btn-light" id="calNextBtn" type="button">下個月 ▶</button>
+            <button class="btn btn-light btn-xs" id="calJumpRefBtn" type="button">跳至基準月</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="cal-grid" id="calendarGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: OPT_Bone TABLE -->
+    <section id="tab-opt-bone" class="tab-section hidden">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">🦴 OPT_Bone 現有研究進行中個案管理表</h2>
+            <p class="panel-desc">可直接於表格內修改日期、負責人與勾選完成狀態</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddSubjectModal('OPT_Bone')" type="button">＋ 新增 OPT_Bone 個案</button>
+        </div>
+        <div class="panel-body">
+          <div class="rule-banner">
+            <span><strong>📌 OPT_Bone 示警規則：</strong></span>
+            <span>1️⃣ <strong>階段結束聯絡評估（第一階段結束、washout結束、第二階段結束）</strong>：前 3 週🟢綠燈、前 2 週🟡黃燈、前 1 週🔴紅燈。</span>
+            <span>2️⃣ <strong>T1 ~ T4 收案提醒</strong>：前 2 天🔴紅燈閃爍，並於月曆加粗紅框。</span>
+            <span>3️⃣ <strong>自動推算 +28 天</strong>：輸入或修改各階段「開始日期」時，會自動將結束日期設為 <code>開始日期 + 28 天</code>（您仍可隨時手動覆寫結束日期）。</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sticky-col">受試者 (編號/縮寫)</th>
+                  <th>篩選日期</th>
+                  <th>T1 時間 & 負責人<br><small>(前2天紅燈閃爍)</small></th>
+                  <th>第一階段介入<br>開始日期</th>
+                  <th>第一階段介入結束日期<br><small>(預設+28天 / 前3,2,1週燈號)</small></th>
+                  <th>T2 時間 & 負責人<br><small>(前2天紅燈閃爍)</small></th>
+                  <th>washout 開始</th>
+                  <th>washout 結束<br><small>(預設+28天 / 前3,2,1週燈號)</small></th>
+                  <th>T3 時間 & 負責人<br><small>(前2天紅燈閃爍)</small></th>
+                  <th>第二階段介入<br>開始日期</th>
+                  <th>第二階段介入結束日期<br><small>(預設+28天 / 前3,2,1週燈號)</small></th>
+                  <th>T4 時間 & 負責人<br><small>(前2天紅燈閃爍)</small></th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="optBoneTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: music40 TABLE -->
+    <section id="tab-music40" class="tab-section hidden">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">🎵 music40 現有研究進行中個案管理表</h2>
+            <p class="panel-desc">支援直接設定「初次／二次／三次問卷日期」（可一鍵帶入同評估日或自訂日期），並提供「勾選完成／逾期未完成」狀態切換</p>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-light" id="fillMusic40QuizDatesBtn" type="button" title="將目前空白的問卷日期一鍵填入對應的評估日期">⚡ 空白問卷日一鍵同評估日</button>
+            <button class="btn btn-primary" onclick="openAddSubjectModal('music40')" type="button">＋ 新增 music40 個案</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="rule-banner">
+            <span><strong>📌 music40 示警規則：</strong></span>
+            <span>1️⃣ <strong>燈號區間</strong>：距離預定日 3 週以上🟢綠燈、2～3 週（8～21天）🟡黃燈、1 週內（≤7天）🔴紅燈、過期未勾選⚠️逾期未完成。</span>
+            <span>2️⃣ <strong>提醒項目</strong>：預計結束日期、預計追蹤日期、初次評估/問卷、二次評估/問卷、三次評估/問卷。</span>
+            <span>3️⃣ <strong>問卷日期設定</strong>：可自由選擇任意日期，或點選格子內的「同評估日」快速帶入。</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sticky-col">受試者 (編號/姓氏)</th>
+                  <th>開始介入日期</th>
+                  <th>預計結束日期<br><small>(約3個月)</small></th>
+                  <th>預計追蹤日期<br><small>(約6個月)</small></th>
+                  <th>初次評估日期 & 負責人1</th>
+                  <th>初次問卷日期 & 負責人2<br><small>(可自訂或同初評日)</small></th>
+                  <th>第二次評估日期 & 負責人3</th>
+                  <th>第二次問卷日期 & 負責人4<br><small>(可自訂或同二評日)</small></th>
+                  <th>第三次評估日期 & 負責人5</th>
+                  <th>第三次問卷日期 & 負責人6<br><small>(可自訂或同三評日)</small></th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="music40TableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: CUSTOM / MULTI-PERIOD STUDIES (1M / 3M / 6M etc.) -->
+    <section id="tab-custom" class="tab-section hidden">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">🧪 多期程實驗專案管理（例如：1 個月、3 個月、6 個月成果收案）</h2>
+            <p class="panel-desc">因應實驗室不同學生負責不同實驗案、各案測試時間段不同（如 1M / 3M / 6M），可在此建立新實驗案並依開始日自動推算各時間段收案日</p>
+          </div>
+          <button class="btn btn-success" onclick="openCreateStudyModal()" type="button">＋ 新增研究案</button>
+        </div>
+        <div class="panel-body" id="customStudiesContainer"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: ADD SUBJECT -->
+  <div class="modal-backdrop" id="addSubjectModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 class="modal-title" id="addSubjectModalTitle">＋ 新增受試者個案</h3>
+        <button class="btn btn-light btn-xs" onclick="closeModal('addSubjectModal')" type="button">✕ 關閉</button>
+      </div>
+      <form id="addSubjectForm">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="newSubStudy">所屬研究案</label>
+              <select id="newSubStudy" required></select>
+            </div>
+            <div class="form-field">
+              <label for="newSubId">受試者編號 (如 S24, S31)</label>
+              <input type="text" id="newSubId" placeholder="例如：S24" required>
+            </div>
+            <div class="form-field">
+              <label for="newSubName">姓名縮寫 ／ 姓氏</label>
+              <input type="text" id="newSubName" placeholder="例如：WANG 或 王">
+            </div>
+            <div class="form-field">
+              <label for="newSubPrimaryOwner">主要負責學生</label>
+              <input type="text" id="newSubPrimaryOwner" list="labMembersDatalist" placeholder="選擇或輸入負責人 (如 HJ, CI)">
+            </div>
+            <div class="form-field">
+              <label for="newSubStartDate">基準／第一階段開始日期 (選填，會自動推算後續節點)</label>
+              <input type="date" id="newSubStartDate">
+            </div>
+            <div class="form-field" id="newSubSecondOwnerWrap">
+              <label for="newSubSecondOwner">次要／問卷負責學生 (music40 適用)</label>
+              <input type="text" id="newSubSecondOwner" list="labMembersDatalist" placeholder="選擇或輸入問卷負責人 (如 潔)">
+            </div>
+          </div>
+          <div style="font-size:12px; color:var(--muted); background:#f8fafc; padding:10px; border-radius:6px;">
+            💡 新增後，系統會依研究案設定之時間點自動推算訪視與收案日期；您亦可直接在表格中自由微調個別受試者日期、負責人或切換完成狀態。
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-light" onclick="closeModal('addSubjectModal')" type="button">取消</button>
+          <button class="btn btn-primary" type="submit">確認新增個案</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: STUDY CONFIG (CREATE / EDIT STUDY & TIMELINE MILESTONES) -->
+  <div class="modal-backdrop" id="studyConfigModal">
+    <div class="modal modal-lg">
+      <div class="modal-head">
+        <h3 class="modal-title" id="studyConfigModalTitle">＋ 新增實驗室研究案與設定追蹤時間點</h3>
+        <button class="btn btn-light btn-xs" onclick="closeModal('studyConfigModal')" type="button">✕ 關閉</button>
+      </div>
+      <form id="studyConfigForm">
+        <input type="hidden" id="editStudyIndex" value="-1">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="studyCodeInput">研究案名稱／代碼 <span style="color:#ef4444;">*</span></label>
+              <input type="text" id="studyCodeInput" placeholder="例如：Neuro_Rehab_2026" required>
+            </div>
+            <div class="form-field">
+              <label for="studyDefaultOwnerSelect">預設負責學生</label>
+              <select id="studyDefaultOwnerSelect"></select>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="studyDescInput">研究案說明／備註</label>
+            <input type="text" id="studyDescInput" placeholder="例如：經顱磁刺激合併動作訓練，為期半年追蹤">
+          </div>
+
+          <!-- Timeline / Milestone Builder Section -->
+          <div style="border-top:1px solid var(--soft-line); padding-top:14px; margin-top:6px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+              <div>
+                <strong style="font-size:13px; color:var(--navy);">⏱️ 設定此研究案之收案追蹤時間點 (Milestones)</strong>
+                <div style="font-size:11px; color:var(--muted);">設定每個節點相對於「受試者開始日」的推算天數，受試者建檔時將自動排程</div>
+              </div>
+              <button type="button" class="btn btn-primary btn-xs" onclick="addMilestoneRow()">＋ 新增追蹤時間點</button>
+            </div>
+
+            <!-- Quick Preset Chips -->
+            <div style="margin-bottom:10px; display:flex; align-items:center; flex-wrap:wrap; gap:6px;">
+              <span style="font-size:11.5px; font-weight:700; color:var(--ink-light); margin-right:4px;">⚡ 快速套用範本：</span>
+              <div class="preset-chips">
+                <button type="button" class="preset-chip" onclick="applyMilestonePreset('1M_3M_6M')">標準三期 (基線/1M/3M/6M)</button>
+                <button type="button" class="preset-chip" onclick="applyMilestonePreset('28D_CROSS')">雙階段+28天介入 (+28D, Washout, 2期)</button>
+                <button type="button" class="preset-chip" onclick="applyMilestonePreset('1M_2M_3M')">密集月追蹤 (1M/2M/3M)</button>
+                <button type="button" class="preset-chip" onclick="applyMilestonePreset('2W_4W_8W')">週追蹤 (2週/4週/8週)</button>
+                <button type="button" class="preset-chip" style="color:#ef4444;" onclick="applyMilestonePreset('CLEAR')">清空重設</button>
+              </div>
+            </div>
+
+            <div style="max-height:270px; overflow-y:auto; border:1px solid var(--line); border-radius:6px; background:#fff;">
+              <table class="milestone-builder-table">
+                <thead>
+                  <tr>
+                    <th style="width:36px; text-align:center;">#</th>
+                    <th>時間點名稱 <span style="color:#ef4444;">*</span></th>
+                    <th style="width:180px;">推算時間 (距開始日)</th>
+                    <th style="width:130px;">預設負責人</th>
+                    <th style="width:170px;">示警規則</th>
+                    <th style="width:85px; text-align:center;">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="milestoneRowsContainer"></tbody>
+              </table>
+            </div>
+            <div style="font-size:11px; color:var(--muted); margin-top:8px;">
+              💡 示警規則說明：
+              <strong>一般提醒</strong> 為到期前 7 天紅燈、8～21 天黃燈、21 天以上綠燈；
+              <strong>重大急件</strong> 額外在到期前 2 天發出<strong>閃爍紅燈與月曆粗外框</strong>提醒。
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-light" onclick="closeModal('studyConfigModal')" type="button">取消</button>
+          <button class="btn btn-success" type="submit" id="saveStudyConfigBtn">💾 儲存研究案設定</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: MANAGE LAB MEMBERS -->
+  <div class="modal-backdrop" id="manageMembersModal">
+    <div class="modal modal-lg">
+      <div class="modal-head">
+        <h3 class="modal-title">👥 實驗室負責人員名冊管理</h3>
+        <button class="btn btn-light btn-xs" onclick="closeModal('manageMembersModal')" type="button">✕ 關閉</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#f8fafc; border:1px solid var(--line); border-radius:8px; padding:12px 14px;">
+          <strong style="font-size:13px; color:var(--navy); display:block; margin-bottom:8px;">＋ 新增實驗室成員／學生</strong>
+          <form id="addMemberForm" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+            <div style="flex:1; min-width:110px;" class="form-field">
+              <label for="newMemId">代號／縮寫 <span style="color:#ef4444;">*</span></label>
+              <input type="text" id="newMemId" placeholder="例如：HJ, 豪, CI" required>
+            </div>
+            <div style="flex:1.5; min-width:140px;" class="form-field">
+              <label for="newMemName">姓名／稱謂</label>
+              <input type="text" id="newMemName" placeholder="例如：林同學 或 H.J. Lin">
+            </div>
+            <div style="flex:1.5; min-width:140px;" class="form-field">
+              <label for="newMemRole">角色／負責項目</label>
+              <input type="text" id="newMemRole" placeholder="例如：研究員 / 碩班生">
+            </div>
+            <button type="submit" class="btn btn-primary" style="height:35px; white-space:nowrap;">＋ 加入名冊</button>
+          </form>
+        </div>
+
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong style="font-size:13px; color:var(--navy);">現有成員名冊 (<span id="memberCountBadge">0</span> 人)</strong>
+            <span style="font-size:11px; color:var(--muted);">名冊中的成員將自動出現在所有研究案負責人下拉選單中</span>
+          </div>
+          <div style="max-height:280px; overflow-y:auto; border:1px solid var(--line); border-radius:6px; background:#fff;">
+            <table class="member-table">
+              <thead>
+                <tr>
+                  <th style="width:110px;">代號 / 標籤</th>
+                  <th>姓名 / 稱謂</th>
+                  <th>角色 / 負責項目</th>
+                  <th style="width:150px;">目前任務負擔</th>
+                  <th style="width:80px; text-align:center;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="memberListTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-primary" onclick="closeModal('manageMembersModal')" type="button">完成關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'ZHENG_LAB_DASHBOARD_DATA_V1';
+
+    // Helper: Add days to YYYY-MM-DD
+    function addDays(dateStr, days) {
+      if (!dateStr) return '';
+      const parts = dateStr.split('-').map(Number);
+      if (parts.length !== 3 || isNaN(parts[0])) return '';
+      const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+      d.setUTCDate(d.getUTCDate() + Number(days));
+      return d.toISOString().slice(0, 10);
+    }
+
+    // Helper: Diff in days (targetDate - refDate)
+    function diffDays(targetDateStr, refDateStr) {
+      if (!targetDateStr || !refDateStr) return null;
+      const [y1, m1, d1] = targetDateStr.split('-').map(Number);
+      const [y2, m2, d2] = refDateStr.split('-').map(Number);
+      const t1 = Date.UTC(y1, m1 - 1, d1);
+      const t2 = Date.UTC(y2, m2 - 1, d2);
+      return Math.round((t1 - t2) / (1000 * 60 * 60 * 24));
+    }
+
+    // Initial Data directly parsed from 收案示警系統現有研究進行中個案整理_鄭老師研究室.xlsx
+    function getDefaultData() {
+      return {
+        refDate: '2026-10-24',
+        members: [
+          { id: 'HJ', name: 'HJ (同學)', role: '研究員 / 碩班生' },
+          { id: 'CI', name: 'CI (同學)', role: '研究員 / 碩班生' },
+          { id: '昊', name: '昊 (同學)', role: '研究員 / 碩班生' },
+          { id: '潔', name: '潔 (同學)', role: '問卷追蹤 / 碩班生' },
+          { id: '紳', name: '紳 (同學)', role: '研究員 / 碩班生' }
+        ],
+        optBone: [
+          {
+            id: 'S01', name: 'LCW', screenDate: '2026-08-21',
+            t1Date: '2026-10-08', t1Owner: 'HJ', t1Done: true,
+            p1Start: '2026-10-13', p1End: '2026-11-07', p1EndOwner: 'HJ', p1EndDone: false,
+            t2Date: '2026-11-10', t2Owner: 'CI', t2Done: false,
+            washStart: '2026-11-11', washEnd: '2026-12-09', washEndOwner: 'CI', washEndDone: false,
+            t3Date: '', t3Owner: '', t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
+            t4Date: '', t4Owner: '', t4Done: false
+          },
+          {
+            id: 'S04', name: 'STE', screenDate: '2026-08-26',
+            t1Date: '2026-10-21', t1Owner: 'CI', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: 'CI', p1EndDone: false,
+            t2Date: '', t2Owner: '', t2Done: false,
+            washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
+            t3Date: '', t3Owner: '', t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
+            t4Date: '', t4Owner: '', t4Done: false
+          },
+          {
+            id: 'S05', name: 'TYH', screenDate: '2026-08-26',
+            t1Date: '2026-10-02', t1Owner: 'CI', t1Done: true,
+            p1Start: '2026-10-06', p1End: '2026-10-31', p1EndOwner: 'CI', p1EndDone: false,
+            t2Date: '2026-11-04', t2Owner: 'HJ', t2Done: false,
+            washStart: '2026-11-05', washEnd: '2026-12-03', washEndOwner: 'HJ', washEndDone: false,
+            t3Date: '', t3Owner: '', t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
+            t4Date: '', t4Owner: '', t4Done: false
+          },
+          {
+            id: 'S07', name: 'PRY', screenDate: '2026-08-27',
+            t1Date: '', t1Owner: '', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: '', p1EndDone: false,
+            t2Date: '', t2Owner: '', t2Done: false,
+            washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
+            t3Date: '', t3Owner: '', t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
+            t4Date: '', t4Owner: '', t4Done: false
+          },
+          {
+            id: 'S08', name: 'CYF', screenDate: '2026-09-08',
+            t1Date: '2026-10-16', t1Owner: 'CI', t1Done: true,
+            p1Start: '2026-10-19', p1End: '2026-11-13', p1EndOwner: 'CI', p1EndDone: false,
+            t2Date: '2026-11-20', t2Owner: 'CI', t2Done: false,
+            washStart: '2026-11-21', washEnd: '2026-12-19', washEndOwner: 'CI', washEndDone: false,
+            t3Date: '', t3Owner: '', t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
+            t4Date: '', t4Owner: '', t4Done: false
+          },
+          {
+            id: 'S09', name: 'SCW', screenDate: '2026-09-10',
+            t1Date: '2026-11-06', t1Owner: 'CI', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: 'CI', p1EndDone: false,
+            t2Date: '', t2Owner: '', t2Done: false,
+            washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
+            t3Date: '', t3Owner: '', t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
+            t4Date: '', t4Owner: '', t4Done: false
+          },
+          {
+            id: 'S10', name: 'HPY', screenDate: '2026-09-11',
+            t1Date: '2026-10-30', t1Owner: 'CI', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: 'CI', p1EndDone: false,
+            t2Date: '', t2Owner: '', t2Done: false,
+            washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
+            t3Date: '', t3Owner: '', t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
+            t4Date: '', t4Owner: '', t4Done: false
+          },
+          {
+            id: 'S11', name: 'LWJ', screenDate: '2026-09-16',
+            t1Date: '2026-10-30', t1Owner: 'CI', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: 'CI', p1EndDone: false,
+            t2Date: '', t2Owner: '', t2Done: false,
+            washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
+            t3Date: '', t3Owner: '', t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
+            t4Date: '', t4Owner: '', t4Done: false
+          },
+          {
+            id: 'S12', name: 'CYC', screenDate: '2026-09-16',
+            t1Date: '', t1Owner: '', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: '', p1EndDone: false,
+            t2Date: '', t2Owner: '', t2Done: false,
+            washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
+            t3Date: '', t3Owner: '', t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
+            t4Date: '', t4Owner: '', t4Done: false
+          },
+          {
+            id: 'S13', name: 'HJS', screenDate: '2026-09-21',
+            t1Date: '2026-11-05', t1Owner: 'HJ', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: 'HJ', p1EndDone: false,
+            t2Date: '', t2Owner: '', t2Done: false,
+            washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
+            t3Date: '', t3Owner: '', t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
+            t4Date: '', t4Owner: '', t4Done: false
+          },
+          {
+            id: 'S15', name: 'JYJ', screenDate: '2026-09-22',
+            t1Date: '', t1Owner: '', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: '', p1EndDone: false,
+            t2Date: '', t2Owner: '', t2Done: false,
+            washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
+            t3Date: '', t3Owner: '', t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
+            t4Date: '', t4Owner: '', t4Done: false
+          },
+          {
+            id: 'S16', name: 'TYC', screenDate: '2026-09-24',
+            t1Date: '', t1Owner: '', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: '', p1EndDone: false,
+            t2Date: '', t2Owner: '', t2Done: false,
+            washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
+            t3Date: '', t3Owner: '', t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
+            t4Date: '', t4Owner: '', t4Done: false
+          }
+        ],
+        music40: [
+          {
+            id: 'S19', name: '許', startDate: '2026-04-15',
+            endDate: '2026-07-28', endOwner: '昊', endDone: true,
+            followDate: '2026-10-06', followOwner: '紳', followDone: true,
+            eval1Date: '2026-04-15', eval1Owner: '昊', eval1Done: true,
+            quiz1Date: '2026-04-15', quiz1Owner: '潔', quiz1Done: true,
+            eval2Date: '2026-07-29', eval2Owner: '昊', eval2Done: true,
+            quiz2Date: '2026-07-29', quiz2Owner: '潔', quiz2Done: true,
+            eval3Date: '2026-10-22', eval3Owner: '紳', eval3Done: false,
+            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+          },
+          {
+            id: 'S20', name: '黃', startDate: '2026-06-22',
+            endDate: '2026-09-21', endOwner: '昊', endDone: true,
+            followDate: '2026-12-10', followOwner: '昊', followDone: false,
+            eval1Date: '2026-06-22', eval1Owner: '昊', eval1Done: true,
+            quiz1Date: '2026-06-22', quiz1Owner: '潔', quiz1Done: true,
+            eval2Date: '2026-09-22', eval2Owner: '昊', eval2Done: true,
+            quiz2Date: '2026-09-22', quiz2Owner: '潔', quiz2Done: true,
+            eval3Date: '', eval3Owner: '', eval3Done: false,
+            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+          },
+          {
+            id: 'S21', name: '楊', startDate: '2026-06-22',
+            endDate: '2026-09-16', endOwner: '昊', endDone: true,
+            followDate: '2026-12-10', followOwner: '昊', followDone: false,
+            eval1Date: '2026-06-22', eval1Owner: '昊', eval1Done: true,
+            quiz1Date: '2026-06-22', quiz1Owner: '潔', quiz1Done: true,
+            eval2Date: '2026-09-17', eval2Owner: '昊', eval2Done: true,
+            quiz2Date: '2026-09-17', quiz2Owner: '潔', quiz2Done: true,
+            eval3Date: '', eval3Owner: '', eval3Done: false,
+            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+          },
+          {
+            id: 'S22', name: '伍', startDate: '2026-10-02',
+            endDate: '2027-01-01', endOwner: '昊', endDone: false,
+            followDate: '2027-03-31', followOwner: '昊', followDone: false,
+            eval1Date: '2026-10-02', eval1Owner: '昊', eval1Done: true,
+            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            eval2Date: '', eval2Owner: '', eval2Done: false,
+            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            eval3Date: '', eval3Owner: '', eval3Done: false,
+            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+          },
+          {
+            id: 'S23', name: '陳', startDate: '2026-10-05',
+            endDate: '2027-01-04', endOwner: '昊', endDone: false,
+            followDate: '2027-04-03', followOwner: '昊', followDone: false,
+            eval1Date: '2026-10-05', eval1Owner: '昊', eval1Done: true,
+            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            eval2Date: '', eval2Owner: '', eval2Done: false,
+            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            eval3Date: '', eval3Owner: '', eval3Done: false,
+            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+          },
+          {
+            id: 'S24', name: '高', startDate: '2026-10-05',
+            endDate: '2027-01-04', endOwner: '昊', endDone: false,
+            followDate: '2027-04-03', followOwner: '昊', followDone: false,
+            eval1Date: '2026-10-05', eval1Owner: '昊', eval1Done: true,
+            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            eval2Date: '', eval2Owner: '', eval2Done: false,
+            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            eval3Date: '', eval3Owner: '', eval3Done: false,
+            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+          },
+          {
+            id: 'S25', name: '黃', startDate: '2026-10-01',
+            endDate: '2026-12-31', endOwner: '昊', endDone: false,
+            followDate: '2027-03-30', followOwner: '昊', followDone: false,
+            eval1Date: '2026-10-01', eval1Owner: '昊', eval1Done: true,
+            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            eval2Date: '', eval2Owner: '', eval2Done: false,
+            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            eval3Date: '', eval3Owner: '', eval3Done: false,
+            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+          },
+          {
+            id: 'S26', name: '蔡', startDate: '2026-10-01',
+            endDate: '2026-12-31', endOwner: '昊', endDone: false,
+            followDate: '2027-03-30', followOwner: '昊', followDone: false,
+            eval1Date: '2026-10-01', eval1Owner: '昊', eval1Done: true,
+            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            eval2Date: '', eval2Owner: '', eval2Done: false,
+            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            eval3Date: '', eval3Owner: '', eval3Done: false,
+            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+          },
+          {
+            id: 'S27', name: '林', startDate: '',
+            endDate: '', endOwner: '紳', endDone: false,
+            followDate: '', followOwner: '紳', followDone: false,
+            eval1Date: '2026-10-19', eval1Owner: '紳', eval1Done: false,
+            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            eval2Date: '', eval2Owner: '', eval2Done: false,
+            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            eval3Date: '', eval3Owner: '', eval3Done: false,
+            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+          },
+          {
+            id: 'S28', name: '李', startDate: '2026-10-19',
+            endDate: '2027-01-18', endOwner: '紳', endDone: false,
+            followDate: '2027-04-17', followOwner: '紳', followDone: false,
+            eval1Date: '2026-10-19', eval1Owner: '紳', eval1Done: false,
+            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            eval2Date: '', eval2Owner: '', eval2Done: false,
+            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            eval3Date: '', eval3Owner: '', eval3Done: false,
+            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+          },
+          {
+            id: 'S29', name: '曾', startDate: '2026-10-19',
+            endDate: '2027-01-18', endOwner: '紳', endDone: false,
+            followDate: '2027-04-18', followOwner: '紳', followDone: false,
+            eval1Date: '2026-10-19', eval1Owner: '紳', eval1Done: false,
+            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            eval2Date: '', eval2Owner: '', eval2Done: false,
+            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            eval3Date: '', eval3Owner: '', eval3Done: false,
+            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+          },
+          {
+            id: 'S30', name: '賴', startDate: '2026-10-19',
+            endDate: '2027-01-18', endOwner: '紳', endDone: false,
+            followDate: '2027-04-19', followOwner: '紳', followDone: false,
+            eval1Date: '2026-10-19', eval1Owner: '紳', eval1Done: false,
+            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            eval2Date: '', eval2Owner: '', eval2Done: false,
+            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            eval3Date: '', eval3Owner: '', eval3Done: false,
+            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+          }
+        ],
+        customStudies: [
+          {
+            code: 'MultiPeriod_Demo (1/3/6月範例)',
+            description: '標準 1/3/6 個月成果收案追蹤範例，依開始日自動推算各期程',
+            defaultOwner: 'HJ',
+            milestones: [
+              { key: 'm0', label: '初次基線收案', offsetDays: 0, rule: 'MUSIC40', owner: 'HJ' },
+              { key: 'm1', label: '1個月成果收案', offsetDays: 30, rule: 'MUSIC40', owner: 'HJ' },
+              { key: 'm2', label: '3個月成果收案', offsetDays: 90, rule: 'MUSIC40', owner: 'CI' },
+              { key: 'm3', label: '6個月成果收案', offsetDays: 180, rule: 'MUSIC40', owner: 'CI' }
+            ],
+            subjects: [
+              {
+                id: 'P01', name: '張(範例)', startDate: '2026-09-28',
+                items: {
+                  m0: { date: '2026-09-28', owner: 'HJ', done: true },
+                  m1: { date: '2026-10-28', owner: 'HJ', done: false },
+                  m2: { date: '2026-12-27', owner: 'CI', done: false },
+                  m3: { date: '2027-03-27', owner: 'CI', done: false }
+                }
+              }
+            ]
+          }
+        ]
+      };
+    }
+
+    var appData = loadData();
+    var calYear = 2026;
+    var calMonth = 10; // 1-12
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.optBone && parsed.music40) {
+            // Ensure members list is initialized
+            if (!parsed.members || !Array.isArray(parsed.members) || parsed.members.length === 0) {
+              parsed.members = [
+                { id: 'HJ', name: 'HJ (同學)', role: '研究員 / 碩班生' },
+                { id: 'CI', name: 'CI (同學)', role: '研究員 / 碩班生' },
+                { id: '昊', name: '昊 (同學)', role: '研究員 / 碩班生' },
+                { id: '潔', name: '潔 (同學)', role: '問卷追蹤 / 碩班生' },
+                { id: '紳', name: '紳 (同學)', role: '研究員 / 碩班生' }
+              ];
+            }
+            if (!parsed.customStudies) parsed.customStudies = [];
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load localStorage data:', e);
+      }
+      return getDefaultData();
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      } catch (e) {
+        console.warn('Failed to save data:', e);
+      }
+    }
+
+    /**
+     * Evaluate traffic light & status for a single milestone item
+     * ruleType:
+     *   - 'OPT_T': T1, T2, T3, T4 in OPT_Bone (2 days before -> RED_T flashing)
+     *   - 'OPT_END': Phase end dates in OPT_Bone (<=7d RED, 8..14d AMBER, 15..21d GREEN, >21d FUTURE)
+     *   - 'MUSIC40': music40 & custom studies (<=7d RED, 8..21d AMBER, >21d GREEN)
+     */
+    function evaluateMilestone(dateStr, done, ruleType, refDateStr) {
+      if (!dateStr) {
+        return {
+          code: 'EMPTY',
+          label: '未設定日期',
+          badgeClass: 'badge-future',
+          cellClass: '',
+          daysDiff: null
+        };
+      }
+      const d = diffDays(dateStr, refDateStr);
+      if (done) {
+        return {
+          code: 'DONE',
+          label: '已完成 ✓',
+          badgeClass: 'badge-done',
+          cellClass: 'state-done',
+          daysDiff: d
+        };
+      }
+      if (d < 0) {
+        return {
+          code: 'OVERDUE',
+          label: `逾期未完成 (${Math.abs(d)}天)`,
+          badgeClass: 'badge-overdue',
+          cellClass: 'state-overdue',
+          daysDiff: d
+        };
+      }
+      if (ruleType === 'OPT_T') {
+        if (d <= 2) {
+          return {
+            code: 'RED_T',
+            label: d === 0 ? '今日收案 (閃燈)' : `前${d}天收案急件`,
+            badgeClass: 'badge-red-flash',
+            cellClass: 'state-red-flash',
+            daysDiff: d
+          };
+        } else if (d <= 7) {
+          return {
+            code: 'RED',
+            label: `前${d}天 (1週內)`,
+            badgeClass: 'badge-red',
+            cellClass: 'state-red',
+            daysDiff: d
+          };
+        } else if (d <= 14) {
+          return {
+            code: 'AMBER',
+            label: `前${d}天 (2週內)`,
+            badgeClass: 'badge-amber',
+            cellClass: 'state-amber',
+            daysDiff: d
+          };
+        } else if (d <= 21) {
+          return {
+            code: 'GREEN',
+            label: `前${d}天 (3週內)`,
+            badgeClass: 'badge-green',
+            cellClass: 'state-green',
+            daysDiff: d
+          };
+        } else {
+          return {
+            code: 'FUTURE',
+            label: `${d}天後`,
+            badgeClass: 'badge-future',
+            cellClass: '',
+            daysDiff: d
+          };
+        }
+      } else if (ruleType === 'OPT_END') {
+        if (d <= 7) {
+          return {
+            code: 'RED',
+            label: d === 0 ? '今日結束 (紅燈)' : `前1週紅燈 (${d}天)`,
+            badgeClass: 'badge-red',
+            cellClass: 'state-red',
+            daysDiff: d
+          };
+        } else if (d <= 14) {
+          return {
+            code: 'AMBER',
+            label: `前2週黃燈 (${d}天)`,
+            badgeClass: 'badge-amber',
+            cellClass: 'state-amber',
+            daysDiff: d
+          };
+        } else if (d <= 21) {
+          return {
+            code: 'GREEN',
+            label: `前3週綠燈 (${d}天)`,
+            badgeClass: 'badge-green',
+            cellClass: 'state-green',
+            daysDiff: d
+          };
+        } else {
+          return {
+            code: 'FUTURE',
+            label: `${d}天後`,
+            badgeClass: 'badge-future',
+            cellClass: '',
+            daysDiff: d
+          };
+        }
+      } else {
+        // MUSIC40 and Custom Studies: <=7d RED, 8..21d AMBER, >21d GREEN
+        if (d <= 7) {
+          return {
+            code: 'RED',
+            label: d === 0 ? '今日到期 (紅燈)' : `1週內紅燈 (${d}天)`,
+            badgeClass: 'badge-red',
+            cellClass: 'state-red',
+            daysDiff: d
+          };
+        } else if (d <= 21) {
+          return {
+            code: 'AMBER',
+            label: `2~3週黃燈 (${d}天)`,
+            badgeClass: 'badge-amber',
+            cellClass: 'state-amber',
+            daysDiff: d
+          };
+        } else {
+          return {
+            code: 'GREEN',
+            label: `3週以上綠燈 (${d}天)`,
+            badgeClass: 'badge-green',
+            cellClass: 'state-green',
+            daysDiff: d
+          };
+        }
+      }
+    }
+
+    // Collect all milestone tasks across all studies for unified filtering, KPIs, Action Board, and Calendar
+    function collectAllTasks() {
+      const refDate = appData.refDate || '2026-10-24';
+      const tasks = [];
+
+      // 1. OPT_Bone
+      appData.optBone.forEach((row, idx) => {
+        const defaultOwner = row.t1Owner || row.t2Owner || '未指定';
+        const defs = [
+          { key: 't1', label: 'T1 收案評估', dateField: 't1Date', ownerField: 't1Owner', doneField: 't1Done', rule: 'OPT_T', desc: 'T1~T4 前2天紅燈閃燈提示' },
+          { key: 'p1End', label: '第一階段介入結束 (聯絡安排評估)', dateField: 'p1End', ownerField: 'p1EndOwner', doneField: 'p1EndDone', rule: 'OPT_END', desc: '階段結束前3週綠、前2週黃、前1週紅' },
+          { key: 't2', label: 'T2 收案評估', dateField: 't2Date', ownerField: 't2Owner', doneField: 't2Done', rule: 'OPT_T', desc: 'T1~T4 前2天紅燈閃燈提示' },
+          { key: 'washEnd', label: 'washout 結束 (聯絡安排評估)', dateField: 'washEnd', ownerField: 'washEndOwner', doneField: 'washEndDone', rule: 'OPT_END', desc: '階段結束前3週綠、前2週黃、前1週紅' },
+          { key: 't3', label: 'T3 收案評估', dateField: 't3Date', ownerField: 't3Owner', doneField: 't3Done', rule: 'OPT_T', desc: 'T1~T4 前2天紅燈閃燈提示' },
+          { key: 'p2End', label: '第二階段介入結束 (聯絡安排評估)', dateField: 'p2End', ownerField: 'p2EndOwner', doneField: 'p2EndDone', rule: 'OPT_END', desc: '階段結束前3週綠、前2週黃、前1週紅' },
+          { key: 't4', label: 'T4 收案評估', dateField: 't4Date', ownerField: 't4Owner', doneField: 't4Done', rule: 'OPT_T', desc: 'T1~T4 前2天紅燈閃燈提示' }
+        ];
+        defs.forEach(def => {
+          const dateVal = row[def.dateField];
+          if (!dateVal) return;
+          const ownerVal = row[def.ownerField] || defaultOwner;
+          const doneVal = !!row[def.doneField];
+          const st = evaluateMilestone(dateVal, doneVal, def.rule, refDate);
+          tasks.push({
+            study: 'OPT_Bone',
+            studyType: 'optBone',
+            rowIndex: idx,
+            subjectId: row.id,
+            subjectName: row.name || '',
+            milestoneKey: def.key,
+            milestoneLabel: def.label,
+            dateField: def.dateField,
+            ownerField: def.ownerField,
+            doneField: def.doneField,
+            date: dateVal,
+            owner: ownerVal,
+            done: doneVal,
+            ruleType: def.rule,
+            ruleDesc: def.desc,
+            status: st
+          });
+        });
+      });
+
+      // 2. music40
+      appData.music40.forEach((row, idx) => {
+        const primaryOwner = row.eval1Owner || row.eval2Owner || row.eval3Owner || '未指定';
+        const defs = [
+          { key: 'eval1', label: '初次評估', dateField: 'eval1Date', ownerField: 'eval1Owner', doneField: 'eval1Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週黃、3週以上綠)' },
+          { key: 'quiz1', label: '初次問卷', dateField: 'quiz1Date', ownerField: 'quiz1Owner', doneField: 'quiz1Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週黃、3週以上綠)' },
+          { key: 'end', label: '預計結束日期 (約3個月)', dateField: 'endDate', ownerField: 'endOwner', doneField: 'endDone', desc: 'music40 階段結束提醒 (1週紅、2~3週黃、3週以上綠)' },
+          { key: 'eval2', label: '第二次評估', dateField: 'eval2Date', ownerField: 'eval2Owner', doneField: 'eval2Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週黃、3週以上綠)' },
+          { key: 'quiz2', label: '第二次問卷', dateField: 'quiz2Date', ownerField: 'quiz2Owner', doneField: 'quiz2Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週黃、3週以上綠)' },
+          { key: 'follow', label: '預計追蹤日期 (約6個月)', dateField: 'followDate', ownerField: 'followOwner', doneField: 'followDone', desc: 'music40 追蹤提醒 (1週紅、2~3週黃、3週以上綠)' },
+          { key: 'eval3', label: '第三次評估', dateField: 'eval3Date', ownerField: 'eval3Owner', doneField: 'eval3Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週黃、3週以上綠)' },
+          { key: 'quiz3', label: '第三次問卷', dateField: 'quiz3Date', ownerField: 'quiz3Owner', doneField: 'quiz3Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週黃、3週以上綠)' }
+        ];
+        defs.forEach(def => {
+          const dateVal = row[def.dateField];
+          if (!dateVal) return;
+          const ownerVal = row[def.ownerField] || primaryOwner;
+          const doneVal = !!row[def.doneField];
+          const st = evaluateMilestone(dateVal, doneVal, 'MUSIC40', refDate);
+          tasks.push({
+            study: 'music40',
+            studyType: 'music40',
+            rowIndex: idx,
+            subjectId: row.id,
+            subjectName: row.name || '',
+            milestoneKey: def.key,
+            milestoneLabel: def.label,
+            dateField: def.dateField,
+            ownerField: def.ownerField,
+            doneField: def.doneField,
+            date: dateVal,
+            owner: ownerVal,
+            done: doneVal,
+            ruleType: 'MUSIC40',
+            ruleDesc: def.desc,
+            status: st
+          });
+        });
+      });
+
+      // 3. Custom Multi-Period Studies
+      (appData.customStudies || []).forEach((stObj, sIdx) => {
+        (stObj.subjects || []).forEach((sub, subIdx) => {
+          (stObj.milestones || []).forEach(ms => {
+            const item = (sub.items && sub.items[ms.key]) || {};
+            if (!item.date) return;
+            const ownerVal = item.owner || ms.owner || stObj.defaultOwner || '未指定';
+            const doneVal = !!item.done;
+            const ruleType = ms.rule || 'MUSIC40';
+            const st = evaluateMilestone(item.date, doneVal, ruleType, refDate);
+            tasks.push({
+              study: stObj.code,
+              studyType: 'custom',
+              studyIndex: sIdx,
+              rowIndex: subIdx,
+              subjectId: sub.id,
+              subjectName: sub.name || '',
+              milestoneKey: ms.key,
+              milestoneLabel: ms.label,
+              date: item.date,
+              owner: ownerVal,
+              done: doneVal,
+              ruleType: ruleType,
+              ruleDesc: ruleType === 'OPT_T' ? '重大急件節點 (≤2天急件閃爍)' : '自訂期程研究案 (1週紅、2~3週黃、3週以上綠)',
+              status: st
+            });
+          });
+        });
+      });
+
+      return tasks;
+    }
+
+    function matchTaskFilter(task, studentFilter, studyFilter, statusFilter, keyword) {
+      if (studentFilter !== 'ALL' && task.owner !== studentFilter) return false;
+      if (studyFilter !== 'ALL' && task.study !== studyFilter) return false;
+      if (keyword) {
+        const kw = keyword.toLowerCase();
+        const hay = `${task.subjectId} ${task.subjectName} ${task.owner} ${task.milestoneLabel} ${task.study}`.toLowerCase();
+        if (!hay.includes(kw)) return false;
+      }
+      if (statusFilter === 'ALL') return true;
+      if (statusFilter === 'ACTION_NEEDED') {
+        return ['OVERDUE', 'RED_T', 'RED', 'AMBER', 'GREEN'].includes(task.status.code);
+      }
+      if (statusFilter === 'OVERDUE') return task.status.code === 'OVERDUE';
+      if (statusFilter === 'RED_T') return task.status.code === 'RED_T';
+      if (statusFilter === 'RED') return task.status.code === 'RED' || task.status.code === 'RED_T';
+      if (statusFilter === 'AMBER') return task.status.code === 'AMBER';
+      if (statusFilter === 'GREEN') return task.status.code === 'GREEN';
+      if (statusFilter === 'DONE') return task.status.code === 'DONE';
+      return true;
+    }
+
+    function populateFilterOptions(allTasks) {
+      const studentSelect = document.getElementById('studentFilter');
+      const studySelect = document.getElementById('studyFilter');
+      const newSubStudy = document.getElementById('newSubStudy');
+      const membersDatalist = document.getElementById('labMembersDatalist');
+
+      const curStudent = studentSelect.value || 'ALL';
+      const curStudy = studySelect.value || 'ALL';
+
+      const students = new Set((appData.members || []).map(m => m.id));
+      allTasks.forEach(t => { if (t.owner) students.add(t.owner); });
+
+      if (membersDatalist) {
+        membersDatalist.innerHTML = Array.from(students).map(s => {
+          const mem = (appData.members || []).find(m => m.id === s);
+          return `<option value="${s}">${mem && mem.name && mem.name !== s ? `${s} (${mem.name})` : s}</option>`;
+        }).join('');
+      }
+
+      studentSelect.innerHTML = '<option value="ALL">全部學生</option>' +
+        Array.from(students).map(s => `<option value="${s}">${s}</option>`).join('');
+      if (Array.from(students).includes(curStudent)) studentSelect.value = curStudent;
+
+      const studies = ['OPT_Bone', 'music40', ...(appData.customStudies || []).map(c => c.code)];
+      studySelect.innerHTML = '<option value="ALL">全部研究案</option>' +
+        studies.map(s => `<option value="${s}">${s}</option>`).join('');
+      if (studies.includes(curStudy)) studySelect.value = curStudy;
+
+      newSubStudy.innerHTML = studies.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+
+    // Render Student Pill
+    function renderStudentPill(owner) {
+      if (!owner) return '<span class="muted">未填</span>';
+      return `<span class="student-pill s-${owner}">${owner}</span>`;
+    }
+
+    // Render Everything
+    function renderAll() {
+      document.getElementById('refDateInput').value = appData.refDate || '2026-10-24';
+      const allTasks = collectAllTasks();
+      populateFilterOptions(allTasks);
+
+      const studentFilter = document.getElementById('studentFilter').value;
+      const studyFilter = document.getElementById('studyFilter').value;
+      const statusFilter = document.getElementById('statusFilter').value;
+      const keyword = document.getElementById('keywordSearch').value.trim();
+
+      // KPI counts (respecting student & study filter, before status filter)
+      const baseFiltered = allTasks.filter(t => matchTaskFilter(t, studentFilter, studyFilter, 'ALL', keyword));
+      const countOverdue = baseFiltered.filter(t => t.status.code === 'OVERDUE').length;
+      const countRed = baseFiltered.filter(t => t.status.code === 'RED' || t.status.code === 'RED_T').length;
+      const countAmber = baseFiltered.filter(t => t.status.code === 'AMBER').length;
+      const countGreen = baseFiltered.filter(t => t.status.code === 'GREEN').length;
+      const countDone = baseFiltered.filter(t => t.status.code === 'DONE').length;
+
+      document.getElementById('kpiOverdue').textContent = countOverdue;
+      document.getElementById('kpiRed').textContent = countRed;
+      document.getElementById('kpiAmber').textContent = countAmber;
+      document.getElementById('kpiGreen').textContent = countGreen;
+      document.getElementById('kpiDone').textContent = countDone;
+
+      document.querySelectorAll('.summary-card').forEach(card => {
+        card.classList.toggle('active-filter', card.dataset.filter === statusFilter);
+      });
+
+      const filteredTasks = allTasks.filter(t => matchTaskFilter(t, studentFilter, studyFilter, statusFilter, keyword));
+
+      document.getElementById('tabCountAction').textContent = filteredTasks.length;
+      document.getElementById('tabCountOpt').textContent = appData.optBone.length;
+      document.getElementById('tabCountMusic').textContent = appData.music40.length;
+      document.getElementById('tabCountCustom').textContent = (appData.customStudies || []).reduce((acc, s) => acc + (s.subjects ? s.subjects.length : 0), 0);
+
+      renderStudentWorkload(allTasks, studentFilter);
+      renderActionTable(filteredTasks);
+      renderCalendar(allTasks, studentFilter, studyFilter, keyword);
+      renderOptBoneTable(studentFilter, keyword);
+      renderMusic40Table(studentFilter, keyword);
+      renderCustomStudies(studentFilter, keyword);
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getStudentColor(owner) {
+      const map = {
+        'HJ': { bg: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', text: '#ffffff' },
+        'CI': { bg: 'linear-gradient(135deg, #8b5cf6, #6d28d9)', text: '#ffffff' },
+        '昊': { bg: 'linear-gradient(135deg, #f59e0b, #d97706)', text: '#ffffff' },
+        '潔': { bg: 'linear-gradient(135deg, #ec4899, #be185d)', text: '#ffffff' },
+        '紳': { bg: 'linear-gradient(135deg, #10b981, #047857)', text: '#ffffff' }
+      };
+      if (map[owner]) return map[owner];
+      let hash = 0;
+      for (let i = 0; i < (owner || '').length; i++) hash = owner.charCodeAt(i) + ((hash << 5) - hash);
+      const gradients = [
+        'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+        'linear-gradient(135deg, #10b981, #047857)',
+        'linear-gradient(135deg, #f59e0b, #d97706)',
+        'linear-gradient(135deg, #ec4899, #be185d)',
+        'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+        'linear-gradient(135deg, #06b6d4, #0e7490)',
+        'linear-gradient(135deg, #6366f1, #4338ca)'
+      ];
+      return { bg: gradients[Math.abs(hash) % gradients.length], text: '#ffffff' };
+    }
+
+    function renderStudentWorkload(allTasks, currentStudent) {
+      const grid = document.getElementById('studentWorkloadGrid');
+      const studentSet = new Set((appData.members || []).map(m => m.id));
+      allTasks.forEach(t => {
+        if (t.owner) studentSet.add(t.owner);
+      });
+      const students = Array.from(studentSet);
+
+      grid.innerHTML = students.map(stu => {
+        const memObj = (appData.members || []).find(m => m.id === stu);
+        const stuTasks = allTasks.filter(t => t.owner === stu);
+        const overdue = stuTasks.filter(t => t.status.code === 'OVERDUE').length;
+        const red = stuTasks.filter(t => t.status.code === 'RED' || t.status.code === 'RED_T').length;
+        const amber = stuTasks.filter(t => t.status.code === 'AMBER').length;
+        const green = stuTasks.filter(t => t.status.code === 'GREEN').length;
+        const done = stuTasks.filter(t => t.status.code === 'DONE').length;
+        const total = stuTasks.length;
+        const pct = total > 0 ? Math.round((done / total) * 100) : 100;
+        const isActive = currentStudent === stu;
+        const color = getStudentColor(stu);
+        const displayName = memObj && memObj.name ? memObj.name : stu;
+        const roleText = memObj && memObj.role ? memObj.role : '實驗室成員';
+
+        return `
+          <div class="student-card ${isActive ? 'active' : ''}" onclick="toggleStudentCardFilter('${escapeHtml(stu)}')">
+            <div class="student-card-head">
+              <div class="student-card-profile">
+                <div class="student-avatar" style="background:${color.bg}; color:${color.text};">
+                  ${escapeHtml(stu.slice(0, 2))}
+                </div>
+                <div class="student-meta">
+                  <div class="student-name-row">
+                    <strong class="student-name">${escapeHtml(displayName)}</strong>
+                    <span class="student-id-tag">${escapeHtml(stu)}</span>
+                  </div>
+                  <div class="student-role-text">${escapeHtml(roleText)}</div>
+                </div>
+              </div>
+              <span class="student-filter-status ${isActive ? 'is-active' : ''}">
+                ${isActive ? '✓ 篩選中' : '點擊篩選'}
+              </span>
+            </div>
+
+            <div class="student-progress-wrap">
+              <div class="student-progress-info">
+                <span>收案完成率 <strong>${pct}%</strong></span>
+                <span class="student-progress-count">${done} / ${total} 項完成</span>
+              </div>
+              <div class="student-progress-track">
+                <div class="student-progress-fill" style="width: ${pct}%;"></div>
+              </div>
+            </div>
+
+            <div class="student-stats">
+              <span class="badge badge-overdue" title="逾期未完成">⚠️ 逾期 ${overdue}</span>
+              <span class="badge badge-red" title="紅燈急件 (≤7天或T點前2天)">🔴 急件 ${red}</span>
+              <span class="badge badge-amber" title="黃燈預警 (2~3週內)">🟡 預警 ${amber}</span>
+              <span class="badge badge-green" title="綠燈提醒 (3週前)">🟢 提醒 ${green}</span>
+              <span class="badge badge-done" title="已完成">✅ 完成 ${done}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleStudentCardFilter(stu) {
+      const sel = document.getElementById('studentFilter');
+      sel.value = (sel.value === stu) ? 'ALL' : stu;
+      renderAll();
+    }
+
+    function renderActionTable(tasks) {
+      const tbody = document.getElementById('actionTableBody');
+      // Sort: OVERDUE first, then RED_T, RED, AMBER, GREEN, FUTURE, DONE, and by date ascending
+      const priority = { OVERDUE: 1, RED_T: 2, RED: 3, AMBER: 4, GREEN: 5, FUTURE: 6, DONE: 7 };
+      const sorted = [...tasks].sort((a, b) => {
+        const pa = priority[a.status.code] || 9;
+        const pb = priority[b.status.code] || 9;
+        if (pa !== pb) return pa - pb;
+        return a.date.localeCompare(b.date);
+      });
+
+      if (sorted.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--muted);">目前篩選條件下沒有符合的收案或評估項目。</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = sorted.map(t => {
+        const dText = t.status.daysDiff === 0
+          ? '<strong>今日到期</strong>'
+          : (t.status.daysDiff > 0 ? `還有 ${t.status.daysDiff} 天` : `已過 ${Math.abs(t.status.daysDiff)} 天`);
+        return `
+          <tr>
+            <td><span class="badge ${t.status.badgeClass}"><span class="badge-dot"></span>${t.status.label}</span></td>
+            <td>${renderStudentPill(t.owner)}</td>
+            <td><strong>${t.date}</strong> <span class="muted">(${dText})</span></td>
+            <td><strong>${t.study}</strong></td>
+            <td><strong>${t.subjectId}</strong> ${t.subjectName ? `<span class="muted">(${t.subjectName})</span>` : ''}</td>
+            <td><strong>${t.milestoneLabel}</strong></td>
+            <td class="muted">${t.ruleDesc}</td>
+            <td>
+              <button type="button" class="toggle-done-btn ${t.done ? 'is-done' : (t.status.code === 'OVERDUE' ? 'is-overdue' : '')}"
+                onclick="toggleTaskDone('${t.studyType}', ${t.studyIndex || 0}, ${t.rowIndex}, '${t.doneField || t.milestoneKey}')">
+                ${t.done ? '✅ 已完成 (點擊改未完成)' : '⬜ 標記為已完成'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function toggleTaskDone(studyType, studyIndex, rowIndex, doneFieldOrKey) {
+      if (studyType === 'optBone') {
+        appData.optBone[rowIndex][doneFieldOrKey] = !appData.optBone[rowIndex][doneFieldOrKey];
+      } else if (studyType === 'music40') {
+        appData.music40[rowIndex][doneFieldOrKey] = !appData.music40[rowIndex][doneFieldOrKey];
+      } else if (studyType === 'custom') {
+        const item = appData.customStudies[studyIndex].subjects[rowIndex].items[doneFieldOrKey];
+        if (item) item.done = !item.done;
+      }
+      saveData();
+      renderAll();
+    }
+
+    // Render Interactive Calendar
+    function renderCalendar(allTasks, studentFilter, studyFilter, keyword) {
+      const titleEl = document.getElementById('calMonthTitle');
+      titleEl.textContent = `${calYear} 年 ${calMonth} 月`;
+
+      const grid = document.getElementById('calendarGrid');
+      const dows = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+      let html = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+      const firstDay = new Date(calYear, calMonth - 1, 1);
+      const startDow = firstDay.getDay();
+      const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+
+      const calTasks = allTasks.filter(t => matchTaskFilter(t, studentFilter, studyFilter, 'ALL', keyword));
+      const tasksByDate = {};
+      calTasks.forEach(t => {
+        if (!tasksByDate[t.date]) tasksByDate[t.date] = [];
+        tasksByDate[t.date].push(t);
+      });
+
+      // Leading empty cells
+      for (let i = 0; i < startDow; i++) {
+        html += `<div class="cal-day other-month"></div>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${calYear}-${String(calMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayTasks = tasksByDate[dateStr] || [];
+        const isRefToday = dateStr === appData.refDate;
+
+        // Check if any task on this day is an OPT_Bone T1~T4 collection task that is not done and within alert window (or any T1~T4 date to highlight on calendar as requested in Excel rule #2)
+        const hasTPointAlert = dayTasks.some(t => t.ruleType === 'OPT_T' && !t.done);
+
+        html += `
+          <div class="cal-day ${isRefToday ? 'is-today' : ''} ${hasTPointAlert ? 'has-t-alert' : ''}">
+            <div class="cal-day-num">
+              <span>${day}日 ${isRefToday ? '<span class="badge badge-done" style="font-size:10px;padding:0 5px;">基準日</span>' : ''}</span>
+              ${hasTPointAlert ? '<span class="badge badge-red-flash" style="font-size:9.5px;padding:0 5px;">🔔 T點收案</span>' : ''}
+            </div>
+            ${dayTasks.map(t => {
+              let evClass = 'ev-future';
+              if (t.done) evClass = 'ev-done';
+              else if (t.ruleType === 'OPT_T') evClass = 'ev-t-urgent';
+              else if (t.status.code === 'OVERDUE') evClass = 'ev-overdue';
+              else if (t.status.code === 'RED') evClass = 'ev-red';
+              else if (t.status.code === 'AMBER') evClass = 'ev-amber';
+              else if (t.status.code === 'GREEN') evClass = 'ev-green';
+
+              return `
+                <div class="cal-event ${evClass}" title="點擊切換完成狀態：${t.study} ${t.subjectId} ${t.milestoneLabel} (${t.owner})"
+                  onclick="toggleTaskDone('${t.studyType}', ${t.studyIndex || 0}, ${t.rowIndex}, '${t.doneField || t.milestoneKey}')">
+                  <div><strong>[${t.owner}] ${t.study}・${t.subjectId}</strong> ${t.done ? '✓' : ''}</div>
+                  <div>${t.milestoneLabel}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      grid.innerHTML = html;
+    }
+
+    // Helper to build a milestone cell inside OPT_Bone or music40 tables
+    function buildMilestoneCellHTML({
+      studyType, rowIndex, dateVal, ownerVal, doneVal,
+      dateField, ownerField, doneField, ruleType,
+      extraBtnHtml = ''
+    }) {
+      const st = evaluateMilestone(dateVal, doneVal, ruleType, appData.refDate);
+      return `
+        <div class="ms-cell ${st.cellClass}">
+          <div class="ms-row-top">
+            <input type="date" class="ms-date-input" value="${dateVal || ''}"
+              onchange="updateTableField('${studyType}', ${rowIndex}, '${dateField}', this.value)">
+            ${ownerField ? `
+              <input type="text" class="ms-owner-input" list="labMembersDatalist" value="${ownerVal || ''}" placeholder="負責人"
+                title="負責學生"
+                onchange="updateTableField('${studyType}', ${rowIndex}, '${ownerField}', this.value)">
+            ` : ''}
+          </div>
+          <div class="ms-row-bottom">
+            <span class="badge ${st.badgeClass}" style="font-size:10px; padding:1px 6px;">${st.label}</span>
+            <div style="display:flex; align-items:center; gap:4px;">
+              ${extraBtnHtml}
+              ${dateVal ? `
+                <button type="button" class="toggle-done-btn ${doneVal ? 'is-done' : (st.code === 'OVERDUE' ? 'is-overdue' : '')}"
+                  onclick="updateTableField('${studyType}', ${rowIndex}, '${doneField}', ${!doneVal})">
+                  ${doneVal ? '✓完成' : (st.code === 'OVERDUE' ? '逾期!' : '待辦')}
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Render OPT_Bone Table
+    function renderOptBoneTable(studentFilter, keyword) {
+      const tbody = document.getElementById('optBoneTableBody');
+      const rows = appData.optBone.map((r, i) => ({ r, i })).filter(({ r }) => {
+        if (studentFilter !== 'ALL') {
+          const owners = [r.t1Owner, r.p1EndOwner, r.t2Owner, r.washEndOwner, r.t3Owner, r.p2EndOwner, r.t4Owner];
+          if (!owners.includes(studentFilter)) return false;
+        }
+        if (keyword) {
+          const kw = keyword.toLowerCase();
+          if (!`${r.id} ${r.name}`.toLowerCase().includes(kw)) return false;
+        }
+        return true;
+      });
+
+      tbody.innerHTML = rows.map(({ r, i }) => {
+        return `
+          <tr>
+            <td class="sticky-col">
+              <div style="font-weight:800; color:var(--navy);">${r.id}</div>
+              <input type="text" value="${r.name || ''}" placeholder="姓名縮寫"
+                style="width:75px; font-size:11px; padding:2px 4px; border:1px solid #cbd5e1; border-radius:4px; margin-top:3px;"
+                onchange="updateTableField('optBone', ${i}, 'name', this.value)">
+            </td>
+            <td>
+              <input type="date" class="ms-date-input" value="${r.screenDate || ''}"
+                onchange="updateTableField('optBone', ${i}, 'screenDate', this.value)">
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'optBone', rowIndex: i,
+                dateVal: r.t1Date, ownerVal: r.t1Owner, doneVal: r.t1Done,
+                dateField: 't1Date', ownerField: 't1Owner', doneField: 't1Done',
+                ruleType: 'OPT_T'
+              })}
+            </td>
+            <td>
+              <input type="date" class="ms-date-input" value="${r.p1Start || ''}"
+                title="輸入開始日期將自動推算 +28 天結束日期"
+                onchange="updateOptStartAndAutoEnd(${i}, 'p1Start', 'p1End', this.value)">
+              <div style="font-size:10px; color:var(--muted); margin-top:3px;">輸入自動+28天</div>
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'optBone', rowIndex: i,
+                dateVal: r.p1End, ownerVal: r.p1EndOwner || r.t1Owner, doneVal: r.p1EndDone,
+                dateField: 'p1End', ownerField: 'p1EndOwner', doneField: 'p1EndDone',
+                ruleType: 'OPT_END',
+                extraBtnHtml: r.p1Start ? `<button type="button" class="auto-calc-hint" onclick="recalcPlus28(${i}, 'p1Start', 'p1End')" title="依開始日重新推算+28天">+28天</button>` : ''
+              })}
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'optBone', rowIndex: i,
+                dateVal: r.t2Date, ownerVal: r.t2Owner, doneVal: r.t2Done,
+                dateField: 't2Date', ownerField: 't2Owner', doneField: 't2Done',
+                ruleType: 'OPT_T'
+              })}
+            </td>
+            <td>
+              <input type="date" class="ms-date-input" value="${r.washStart || ''}"
+                title="輸入開始日期將自動推算 +28 天結束日期"
+                onchange="updateOptStartAndAutoEnd(${i}, 'washStart', 'washEnd', this.value)">
+              <div style="font-size:10px; color:var(--muted); margin-top:3px;">輸入自動+28天</div>
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'optBone', rowIndex: i,
+                dateVal: r.washEnd, ownerVal: r.washEndOwner || r.t2Owner, doneVal: r.washEndDone,
+                dateField: 'washEnd', ownerField: 'washEndOwner', doneField: 'washEndDone',
+                ruleType: 'OPT_END',
+                extraBtnHtml: r.washStart ? `<button type="button" class="auto-calc-hint" onclick="recalcPlus28(${i}, 'washStart', 'washEnd')" title="依開始日重新推算+28天">+28天</button>` : ''
+              })}
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'optBone', rowIndex: i,
+                dateVal: r.t3Date, ownerVal: r.t3Owner, doneVal: r.t3Done,
+                dateField: 't3Date', ownerField: 't3Owner', doneField: 't3Done',
+                ruleType: 'OPT_T'
+              })}
+            </td>
+            <td>
+              <input type="date" class="ms-date-input" value="${r.p2Start || ''}"
+                title="輸入開始日期將自動推算 +28 天結束日期"
+                onchange="updateOptStartAndAutoEnd(${i}, 'p2Start', 'p2End', this.value)">
+              <div style="font-size:10px; color:var(--muted); margin-top:3px;">輸入自動+28天</div>
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'optBone', rowIndex: i,
+                dateVal: r.p2End, ownerVal: r.p2EndOwner || r.t3Owner, doneVal: r.p2EndDone,
+                dateField: 'p2End', ownerField: 'p2EndOwner', doneField: 'p2EndDone',
+                ruleType: 'OPT_END',
+                extraBtnHtml: r.p2Start ? `<button type="button" class="auto-calc-hint" onclick="recalcPlus28(${i}, 'p2Start', 'p2End')" title="依開始日重新推算+28天">+28天</button>` : ''
+              })}
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'optBone', rowIndex: i,
+                dateVal: r.t4Date, ownerVal: r.t4Owner, doneVal: r.t4Done,
+                dateField: 't4Date', ownerField: 't4Owner', doneField: 't4Done',
+                ruleType: 'OPT_T'
+              })}
+            </td>
+            <td>
+              <button type="button" class="btn btn-danger-outline btn-xs" onclick="deleteSubject('optBone', ${i})">刪除</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render music40 Table
+    function renderMusic40Table(studentFilter, keyword) {
+      const tbody = document.getElementById('music40TableBody');
+      const rows = appData.music40.map((r, i) => ({ r, i })).filter(({ r }) => {
+        if (studentFilter !== 'ALL') {
+          const owners = [r.endOwner, r.followOwner, r.eval1Owner, r.quiz1Owner, r.eval2Owner, r.quiz2Owner, r.eval3Owner, r.quiz3Owner];
+          if (!owners.includes(studentFilter)) return false;
+        }
+        if (keyword) {
+          const kw = keyword.toLowerCase();
+          if (!`${r.id} ${r.name}`.toLowerCase().includes(kw)) return false;
+        }
+        return true;
+      });
+
+      tbody.innerHTML = rows.map(({ r, i }) => {
+        return `
+          <tr>
+            <td class="sticky-col">
+              <div style="font-weight:800; color:var(--navy);">${r.id}</div>
+              <input type="text" value="${r.name || ''}" placeholder="姓氏"
+                style="width:65px; font-size:11px; padding:2px 4px; border:1px solid #cbd5e1; border-radius:4px; margin-top:3px;"
+                onchange="updateTableField('music40', ${i}, 'name', this.value)">
+            </td>
+            <td>
+              <input type="date" class="ms-date-input" value="${r.startDate || ''}"
+                onchange="updateMusicStart(${i}, this.value)">
+              <div style="font-size:10px; color:var(--muted); margin-top:3px;">基準介入日</div>
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'music40', rowIndex: i,
+                dateVal: r.endDate, ownerVal: r.endOwner || r.eval1Owner, doneVal: r.endDone,
+                dateField: 'endDate', ownerField: 'endOwner', doneField: 'endDone',
+                ruleType: 'MUSIC40',
+                extraBtnHtml: r.startDate ? `<button type="button" class="auto-calc-hint" onclick="setMusicOffset(${i}, 'endDate', 90)" title="依開始日推算+90天(約3個月)">+3月</button>` : ''
+              })}
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'music40', rowIndex: i,
+                dateVal: r.followDate, ownerVal: r.followOwner || r.eval1Owner, doneVal: r.followDone,
+                dateField: 'followDate', ownerField: 'followOwner', doneField: 'followDone',
+                ruleType: 'MUSIC40',
+                extraBtnHtml: r.startDate ? `<button type="button" class="auto-calc-hint" onclick="setMusicOffset(${i}, 'followDate', 180)" title="依開始日推算+180天(約6個月)">+6月</button>` : ''
+              })}
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'music40', rowIndex: i,
+                dateVal: r.eval1Date, ownerVal: r.eval1Owner, doneVal: r.eval1Done,
+                dateField: 'eval1Date', ownerField: 'eval1Owner', doneField: 'eval1Done',
+                ruleType: 'MUSIC40'
+              })}
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'music40', rowIndex: i,
+                dateVal: r.quiz1Date, ownerVal: r.quiz1Owner, doneVal: r.quiz1Done,
+                dateField: 'quiz1Date', ownerField: 'quiz1Owner', doneField: 'quiz1Done',
+                ruleType: 'MUSIC40',
+                extraBtnHtml: r.eval1Date ? `<button type="button" class="auto-calc-hint" onclick="copyEvalToQuiz(${i}, 'eval1Date', 'quiz1Date')" title="設為與初次評估同日">同初評日</button>` : ''
+              })}
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'music40', rowIndex: i,
+                dateVal: r.eval2Date, ownerVal: r.eval2Owner, doneVal: r.eval2Done,
+                dateField: 'eval2Date', ownerField: 'eval2Owner', doneField: 'eval2Done',
+                ruleType: 'MUSIC40'
+              })}
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'music40', rowIndex: i,
+                dateVal: r.quiz2Date, ownerVal: r.quiz2Owner, doneVal: r.quiz2Done,
+                dateField: 'quiz2Date', ownerField: 'quiz2Owner', doneField: 'quiz2Done',
+                ruleType: 'MUSIC40',
+                extraBtnHtml: r.eval2Date ? `<button type="button" class="auto-calc-hint" onclick="copyEvalToQuiz(${i}, 'eval2Date', 'quiz2Date')" title="設為與第二次評估同日">同二評日</button>` : ''
+              })}
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'music40', rowIndex: i,
+                dateVal: r.eval3Date, ownerVal: r.eval3Owner, doneVal: r.eval3Done,
+                dateField: 'eval3Date', ownerField: 'eval3Owner', doneField: 'eval3Done',
+                ruleType: 'MUSIC40'
+              })}
+            </td>
+            <td>
+              ${buildMilestoneCellHTML({
+                studyType: 'music40', rowIndex: i,
+                dateVal: r.quiz3Date, ownerVal: r.quiz3Owner, doneVal: r.quiz3Done,
+                dateField: 'quiz3Date', ownerField: 'quiz3Owner', doneField: 'quiz3Done',
+                ruleType: 'MUSIC40',
+                extraBtnHtml: r.eval3Date ? `<button type="button" class="auto-calc-hint" onclick="copyEvalToQuiz(${i}, 'eval3Date', 'quiz3Date')" title="設為與第三次評估同日">同三評日</button>` : ''
+              })}
+            </td>
+            <td>
+              <button type="button" class="btn btn-danger-outline btn-xs" onclick="deleteSubject('music40', ${i})">刪除</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render Custom Multi-Period Studies (1M / 3M / 6M etc.)
+    function renderCustomStudies(studentFilter, keyword) {
+      const container = document.getElementById('customStudiesContainer');
+      const studies = appData.customStudies || [];
+      if (studies.length === 0) {
+        container.innerHTML = `<div style="padding:20px; text-align:center; color:var(--muted);">目前尚無自訂研究案，請點擊右上角「＋ 新增研究案」建立（例如 1個月／3個月／6個月收案追蹤）。</div>`;
+        return;
+      }
+
+      container.innerHTML = studies.map((stObj, sIdx) => {
+        const milestones = stObj.milestones || [];
+
+        // Filter subjects
+        const subjects = (stObj.subjects || []).map((sub, subIdx) => ({ sub, subIdx })).filter(({ sub }) => {
+          if (studentFilter !== 'ALL') {
+            const owners = Object.values(sub.items || {}).map(it => it.owner || stObj.defaultOwner);
+            if (!owners.includes(studentFilter)) return false;
+          }
+          if (keyword) {
+            const kw = keyword.toLowerCase();
+            if (!`${sub.id} ${sub.name || ''}`.toLowerCase().includes(kw)) return false;
+          }
+          return true;
+        });
+
+        return `
+          <div style="border:1px solid var(--line); border-radius:8px; margin-bottom:20px; overflow:hidden; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="background:#f1f5f9; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; border-bottom:1px solid var(--line);">
+              <div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <strong style="font-size:15px; color:var(--navy);">🧪 ${stObj.code}</strong>
+                  <span class="badge badge-future" style="font-size:11px;">共 ${stObj.subjects ? stObj.subjects.length : 0} 位個案</span>
+                </div>
+                <div style="font-size:12px; color:var(--muted); margin-top:4px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                  ${stObj.description ? `<span>📝 ${stObj.description}</span><span>•</span>` : ''}
+                  <span>預設負責人：${renderStudentPill(stObj.defaultOwner)}</span>
+                  <span>•</span>
+                  <span>追蹤節點：${milestones.map(m => `<code>${m.label} (+${m.offsetDays}天${m.rule === 'OPT_T' ? '⚡' : ''})</code>`).join(' ➔ ') || '<span class="muted">未設定</span>'}</span>
+                </div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button type="button" class="btn btn-primary btn-xs" onclick="openAddSubjectModal('${stObj.code}')">＋ 新增受試者</button>
+                <button type="button" class="btn btn-secondary btn-xs" onclick="openEditStudyModal(${sIdx})" title="修改研究案名稱、備註或增減追蹤時間點">✏️ 編輯時間點與設定</button>
+                <button type="button" class="btn btn-danger-outline btn-xs" onclick="deleteCustomStudy(${sIdx})">刪除研究案</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="sticky-col">受試者</th>
+                    <th>實驗開始日<br><small>(可點擊一鍵推算)</small></th>
+                    ${milestones.map(m => `
+                      <th>
+                        <div>${m.label}</div>
+                        <div style="font-weight:normal; font-size:10px; color:var(--muted); margin-top:2px;">
+                          預設 +${m.offsetDays} 天
+                          ${m.rule === 'OPT_T' ? '<span class="badge badge-red" style="font-size:9px; padding:0 3px; margin-left:2px;">⚡重大急件</span>' : ''}
+                        </div>
+                      </th>
+                    `).join('')}
+                    <th style="width:70px;">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${subjects.length === 0 ? `
+                    <tr><td colspan="${milestones.length + 3}" style="text-align:center; padding:18px; color:var(--muted);">此研究案目前無符合篩選條件的受試者。</td></tr>
+                  ` : subjects.map(({ sub, subIdx }) => `
+                    <tr>
+                      <td class="sticky-col">
+                        <strong>${sub.id}</strong>
+                        <div class="muted" style="font-size:11px;">${sub.name || ''}</div>
+                      </td>
+                      <td>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                          <input type="date" class="ms-date-input" value="${sub.startDate || ''}"
+                            title="修改開始日期自動推算各期程"
+                            onchange="updateCustomSubStart(${sIdx}, ${subIdx}, this.value)">
+                          ${sub.startDate ? `
+                            <button type="button" class="auto-calc-hint" onclick="resyncCustomSubDates(${sIdx}, ${subIdx})" title="依此開始日重新推算所有時間點">推算</button>
+                          ` : ''}
+                        </div>
+                      </td>
+                      ${milestones.map(m => {
+                        const item = (sub.items && sub.items[m.key]) || { date: '', owner: m.owner || stObj.defaultOwner, done: false };
+                        const ruleType = m.rule || 'MUSIC40';
+                        const st = evaluateMilestone(item.date, item.done, ruleType, appData.refDate);
+                        return `
+                          <td>
+                            <div class="ms-cell ${st.cellClass}">
+                              <div class="ms-row-top">
+                                <input type="date" class="ms-date-input" value="${item.date || ''}"
+                                  onchange="updateCustomItem(${sIdx}, ${subIdx}, '${m.key}', 'date', this.value)">
+                                <input type="text" class="ms-owner-input" list="labMembersDatalist" value="${item.owner || ''}" placeholder="負責人"
+                                  onchange="updateCustomItem(${sIdx}, ${subIdx}, '${m.key}', 'owner', this.value)">
+                              </div>
+                              <div class="ms-row-bottom">
+                                <span class="badge ${st.badgeClass}" style="font-size:10px; padding:1px 6px;">${st.label}</span>
+                                ${item.date ? `
+                                  <button type="button" class="toggle-done-btn ${item.done ? 'is-done' : (st.code === 'OVERDUE' ? 'is-overdue' : '')}"
+                                    onclick="updateCustomItem(${sIdx}, ${subIdx}, '${m.key}', 'done', ${!item.done})">
+                                    ${item.done ? '✓完成' : (st.code === 'OVERDUE' ? '逾期!' : '待辦')}
+                                  </button>
+                                ` : ''}
+                              </div>
+                            </div>
+                          </td>
+                        `;
+                      }).join('')}
+                      <td>
+                        <button type="button" class="btn btn-danger-outline btn-xs" onclick="deleteCustomSubject(${sIdx}, ${subIdx})">刪除</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Field Updaters
+    function updateTableField(studyType, rowIndex, field, value) {
+      appData[studyType][rowIndex][field] = value;
+      saveData();
+      renderAll();
+    }
+
+    // OPT_Bone rule #3: Entering start date automatically sets end date = start date + 28 days
+    function updateOptStartAndAutoEnd(rowIndex, startField, endField, startVal) {
+      const row = appData.optBone[rowIndex];
+      row[startField] = startVal;
+      if (startVal) {
+        row[endField] = addDays(startVal, 28);
+      }
+      saveData();
+      renderAll();
+    }
+
+    function recalcPlus28(rowIndex, startField, endField) {
+      const row = appData.optBone[rowIndex];
+      if (row[startField]) {
+        row[endField] = addDays(row[startField], 28);
+        saveData();
+        renderAll();
+      }
+    }
+
+    function updateMusicStart(rowIndex, startVal) {
+      const row = appData.music40[rowIndex];
+      row.startDate = startVal;
+      if (startVal) {
+        if (!row.eval1Date) row.eval1Date = startVal;
+        if (!row.endDate) row.endDate = addDays(startVal, 90);
+        if (!row.followDate) row.followDate = addDays(startVal, 180);
+      }
+      saveData();
+      renderAll();
+    }
+
+    function setMusicOffset(rowIndex, targetField, days) {
+      const row = appData.music40[rowIndex];
+      if (row.startDate) {
+        row[targetField] = addDays(row.startDate, days);
+        saveData();
+        renderAll();
+      }
+    }
+
+    function copyEvalToQuiz(rowIndex, evalField, quizField) {
+      const row = appData.music40[rowIndex];
+      if (row[evalField]) {
+        row[quizField] = row[evalField];
+        saveData();
+        renderAll();
+      }
+    }
+
+    function updateCustomSubStart(studyIdx, subIdx, startVal) {
+      const stObj = appData.customStudies[studyIdx];
+      const sub = stObj.subjects[subIdx];
+      sub.startDate = startVal;
+      if (startVal) {
+        (stObj.milestones || []).forEach(m => {
+          if (!sub.items[m.key]) sub.items[m.key] = { date: '', owner: stObj.defaultOwner, done: false };
+          sub.items[m.key].date = addDays(startVal, m.offsetDays);
+        });
+      }
+      saveData();
+      renderAll();
+    }
+
+    function updateCustomItem(studyIdx, subIdx, mKey, field, value) {
+      const sub = appData.customStudies[studyIdx].subjects[subIdx];
+      if (!sub.items[mKey]) sub.items[mKey] = { date: '', owner: '', done: false };
+      sub.items[mKey][field] = value;
+      saveData();
+      renderAll();
+    }
+
+    function deleteSubject(studyType, rowIndex) {
+      const row = appData[studyType][rowIndex];
+      if (!confirm(`確定要刪除受試者 ${row.id} (${row.name || ''}) 嗎？`)) return;
+      appData[studyType].splice(rowIndex, 1);
+      saveData();
+      renderAll();
+    }
+
+    function deleteCustomSubject(studyIdx, subIdx) {
+      const sub = appData.customStudies[studyIdx].subjects[subIdx];
+      if (!confirm(`確定要刪除受試者 ${sub.id} 嗎？`)) return;
+      appData.customStudies[studyIdx].subjects.splice(subIdx, 1);
+      saveData();
+      renderAll();
+    }
+
+    function deleteCustomStudy(studyIdx) {
+      const stObj = appData.customStudies[studyIdx];
+      if (!confirm(`確定要刪除整個研究案「${stObj.code}」嗎？`)) return;
+      appData.customStudies.splice(studyIdx, 1);
+      saveData();
+      renderAll();
+    }
+
+    // Helper: Resync all milestone dates for a subject based on startDate
+    function resyncCustomSubDates(studyIdx, subIdx) {
+      const stObj = appData.customStudies[studyIdx];
+      const sub = stObj.subjects[subIdx];
+      if (!sub.startDate) return;
+      (stObj.milestones || []).forEach(m => {
+        if (!sub.items) sub.items = {};
+        if (!sub.items[m.key]) sub.items[m.key] = { date: '', owner: m.owner || stObj.defaultOwner, done: false };
+        sub.items[m.key].date = addDays(sub.startDate, m.offsetDays);
+      });
+      saveData();
+      renderAll();
+    }
+
+    // Modals
+    function openAddSubjectModal(defaultStudy) {
+      const modal = document.getElementById('addSubjectModal');
+      const select = document.getElementById('newSubStudy');
+      if (defaultStudy) select.value = defaultStudy;
+      document.getElementById('newSubId').value = '';
+      document.getElementById('newSubName').value = '';
+      document.getElementById('newSubStartDate').value = appData.refDate || '2026-10-24';
+
+      const curStudy = select.value;
+      let defOwner = 'HJ';
+      if (curStudy === 'OPT_Bone') defOwner = 'HJ';
+      else if (curStudy === 'music40') defOwner = '紳';
+      else {
+        const st = (appData.customStudies || []).find(s => s.code === curStudy);
+        if (st && st.defaultOwner) defOwner = st.defaultOwner;
+      }
+      document.getElementById('newSubPrimaryOwner').value = defOwner;
+      document.getElementById('newSubSecondOwner').value = '潔';
+      modal.classList.add('open');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    // ====== MEMBER MANAGEMENT LOGIC ======
+    function openManageMembersModal() {
+      renderMemberListTable();
+      document.getElementById('manageMembersModal').classList.add('open');
+    }
+
+    function renderMemberListTable() {
+      const tbody = document.getElementById('memberListTableBody');
+      const countBadge = document.getElementById('memberCountBadge');
+      const members = appData.members || [];
+      if (countBadge) countBadge.textContent = members.length;
+
+      const allTasks = collectAllTasks();
+
+      tbody.innerHTML = members.map((mem, idx) => {
+        const memTasks = allTasks.filter(t => t.owner === mem.id);
+        const overdue = memTasks.filter(t => t.status.code === 'OVERDUE').length;
+        const active = memTasks.filter(t => t.status.code !== 'DONE' && t.status.code !== 'EMPTY').length;
+        const done = memTasks.filter(t => t.status.code === 'DONE').length;
+
+        return `
+          <tr>
+            <td>${renderStudentPill(mem.id)}</td>
+            <td><strong>${mem.name || mem.id}</strong></td>
+            <td><span class="muted">${mem.role || '未備註'}</span></td>
+            <td>
+              <div style="font-size:11px; display:flex; gap:4px; flex-wrap:wrap;">
+                ${overdue > 0 ? `<span class="badge badge-overdue" style="font-size:10px;">逾期 ${overdue}</span>` : ''}
+                <span class="badge badge-amber" style="font-size:10px;">待辦 ${active}</span>
+                <span class="badge badge-done" style="font-size:10px;">完成 ${done}</span>
+              </div>
+            </td>
+            <td style="text-align:center;">
+              <button type="button" class="btn btn-danger-outline btn-xs" onclick="deleteMember(${idx})" title="刪除此成員">刪除</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function deleteMember(idx) {
+      const mem = appData.members[idx];
+      const allTasks = collectAllTasks();
+      const assigned = allTasks.filter(t => t.owner === mem.id).length;
+      const msg = assigned > 0
+        ? `成員「${mem.id}」目前指派有 ${assigned} 項任務。\n確定要將其從名冊中移除嗎？（既有任務與歷史資料仍會保留其代號）`
+        : `確定要移除成員「${mem.id}」嗎？`;
+      if (!confirm(msg)) return;
+      appData.members.splice(idx, 1);
+      saveData();
+      renderMemberListTable();
+      renderAll();
+    }
+
+    // ====== STUDY & TIMELINE BUILDER LOGIC ======
+    var editingMilestones = [];
+
+    function populateStudyOwnerSelect(selectId, selectedVal) {
+      const sel = document.getElementById(selectId);
+      if (!sel) return;
+      const members = appData.members || [];
+      sel.innerHTML = members.map(m => {
+        const isSel = (m.id === selectedVal) ? 'selected' : '';
+        return `<option value="${m.id}" ${isSel}>${m.id} ${m.name && m.name !== m.id ? `(${m.name})` : ''}</option>`;
+      }).join('');
+    }
+
+    function openCreateStudyModal() {
+      document.getElementById('editStudyIndex').value = '-1';
+      document.getElementById('studyConfigModalTitle').textContent = '＋ 新增實驗室研究案與設定追蹤時間點';
+      document.getElementById('studyCodeInput').value = '';
+      document.getElementById('studyDescInput').value = '';
+      document.getElementById('studyCodeInput').readOnly = false;
+      populateStudyOwnerSelect('studyDefaultOwnerSelect', (appData.members && appData.members[0] ? appData.members[0].id : 'HJ'));
+      applyMilestonePreset('1M_3M_6M');
+      document.getElementById('studyConfigModal').classList.add('open');
+    }
+
+    function openEditStudyModal(studyIdx) {
+      const stObj = appData.customStudies[studyIdx];
+      if (!stObj) return;
+      document.getElementById('editStudyIndex').value = studyIdx;
+      document.getElementById('studyConfigModalTitle').textContent = `✏️ 編輯研究案設定與追蹤時間點：${stObj.code}`;
+      document.getElementById('studyCodeInput').value = stObj.code;
+      document.getElementById('studyDescInput').value = stObj.description || '';
+      populateStudyOwnerSelect('studyDefaultOwnerSelect', stObj.defaultOwner);
+
+      editingMilestones = (stObj.milestones || []).map((m, idx) => ({
+        key: m.key || ('m' + idx),
+        label: m.label || `階段${idx + 1}`,
+        offsetDays: Number(m.offsetDays) || 0,
+        rule: m.rule || 'MUSIC40',
+        owner: m.owner || ''
+      }));
+      renderMilestoneRows();
+      document.getElementById('studyConfigModal').classList.add('open');
+    }
+
+    function applyMilestonePreset(presetKey) {
+      if (presetKey === '1M_3M_6M') {
+        editingMilestones = [
+          { key: 'm0', label: '初次基線評估', offsetDays: 0, rule: 'MUSIC40', owner: '' },
+          { key: 'm1', label: '1個月成果收案', offsetDays: 30, rule: 'MUSIC40', owner: '' },
+          { key: 'm2', label: '3個月成果收案', offsetDays: 90, rule: 'MUSIC40', owner: '' },
+          { key: 'm3', label: '6個月成果收案', offsetDays: 180, rule: 'MUSIC40', owner: '' }
+        ];
+      } else if (presetKey === '28D_CROSS') {
+        editingMilestones = [
+          { key: 'm0', label: 'T1 初次收案', offsetDays: 0, rule: 'OPT_T', owner: '' },
+          { key: 'm1', label: '第1期結束 (+28天)', offsetDays: 28, rule: 'MUSIC40', owner: '' },
+          { key: 'm2', label: 'Washout 結束 (+56天)', offsetDays: 56, rule: 'MUSIC40', owner: '' },
+          { key: 'm3', label: '第2期結束 (+84天)', offsetDays: 84, rule: 'MUSIC40', owner: '' }
+        ];
+      } else if (presetKey === '1M_2M_3M') {
+        editingMilestones = [
+          { key: 'm0', label: '1個月成果收案', offsetDays: 30, rule: 'MUSIC40', owner: '' },
+          { key: 'm1', label: '2個月成果收案', offsetDays: 60, rule: 'MUSIC40', owner: '' },
+          { key: 'm2', label: '3個月成果收案', offsetDays: 90, rule: 'MUSIC40', owner: '' }
+        ];
+      } else if (presetKey === '2W_4W_8W') {
+        editingMilestones = [
+          { key: 'm0', label: '初次訪視 (基線)', offsetDays: 0, rule: 'MUSIC40', owner: '' },
+          { key: 'm1', label: '第2週訪視追蹤', offsetDays: 14, rule: 'MUSIC40', owner: '' },
+          { key: 'm2', label: '第4週訪視追蹤', offsetDays: 28, rule: 'MUSIC40', owner: '' },
+          { key: 'm3', label: '第8週結案訪視', offsetDays: 56, rule: 'MUSIC40', owner: '' }
+        ];
+      } else if (presetKey === 'CLEAR') {
+        editingMilestones = [];
+      }
+      renderMilestoneRows();
+    }
+
+    function addMilestoneRow() {
+      const nextIdx = editingMilestones.length;
+      editingMilestones.push({
+        key: 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        label: nextIdx === 0 ? '初次基線收案' : `追蹤階段 ${nextIdx + 1}`,
+        offsetDays: nextIdx === 0 ? 0 : 30 * nextIdx,
+        rule: 'MUSIC40',
+        owner: ''
+      });
+      renderMilestoneRows();
+    }
+
+    function removeMilestoneRow(idx) {
+      editingMilestones.splice(idx, 1);
+      renderMilestoneRows();
+    }
+
+    function moveMilestoneRow(idx, direction) {
+      const target = idx + direction;
+      if (target < 0 || target >= editingMilestones.length) return;
+      const temp = editingMilestones[idx];
+      editingMilestones[idx] = editingMilestones[target];
+      editingMilestones[target] = temp;
+      renderMilestoneRows();
+    }
+
+    function renderMilestoneRows() {
+      const tbody = document.getElementById('milestoneRowsContainer');
+      if (!tbody) return;
+      const members = appData.members || [];
+
+      if (editingMilestones.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:18px; color:var(--muted);">目前尚未設定時間點，請點擊上方範本或「＋ 新增追蹤時間點」。</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = editingMilestones.map((m, idx) => {
+        return `
+          <tr>
+            <td style="text-align:center; font-weight:700; color:var(--muted);">${idx + 1}</td>
+            <td>
+              <input type="text" style="width:100%;" value="${m.label || ''}" placeholder="例如：1個月成果收案"
+                oninput="editingMilestones[${idx}].label = this.value">
+            </td>
+            <td>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <span>+</span>
+                <input type="number" style="width:70px;" value="${m.offsetDays || 0}" min="0" step="1"
+                  oninput="editingMilestones[${idx}].offsetDays = Number(this.value)">
+                <span>天</span>
+                <div style="display:flex; gap:2px; margin-left:4px;">
+                  <button type="button" class="btn btn-secondary btn-xs" style="padding:1px 4px; font-size:10px;"
+                    title="設為1個月 (30天)" onclick="editingMilestones[${idx}].offsetDays = 30; renderMilestoneRows();">1M</button>
+                  <button type="button" class="btn btn-secondary btn-xs" style="padding:1px 4px; font-size:10px;"
+                    title="設為3個月 (90天)" onclick="editingMilestones[${idx}].offsetDays = 90; renderMilestoneRows();">3M</button>
+                  <button type="button" class="btn btn-secondary btn-xs" style="padding:1px 4px; font-size:10px;"
+                    title="設為6個月 (180天)" onclick="editingMilestones[${idx}].offsetDays = 180; renderMilestoneRows();">6M</button>
+                </div>
+              </div>
+            </td>
+            <td>
+              <select style="width:100%;" onchange="editingMilestones[${idx}].owner = this.value">
+                <option value="">同研究預設</option>
+                ${members.map(mem => `<option value="${mem.id}" ${m.owner === mem.id ? 'selected' : ''}>${mem.id}</option>`).join('')}
+              </select>
+            </td>
+            <td>
+              <select style="width:100%; font-size:11px;" onchange="editingMilestones[${idx}].rule = this.value">
+                <option value="MUSIC40" ${m.rule !== 'OPT_T' ? 'selected' : ''}>一般提醒 (1週紅/2-3週黃)</option>
+                <option value="OPT_T" ${m.rule === 'OPT_T' ? 'selected' : ''}>⚡ 重大急件 (≤2天急件閃紅燈)</option>
+              </select>
+            </td>
+            <td style="text-align:center;">
+              <div style="display:inline-flex; gap:2px;">
+                <button type="button" class="btn btn-secondary btn-xs" style="padding:1px 5px;" title="上移"
+                  onclick="moveMilestoneRow(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>↑</button>
+                <button type="button" class="btn btn-secondary btn-xs" style="padding:1px 5px;" title="下移"
+                  onclick="moveMilestoneRow(${idx}, 1)" ${idx === editingMilestones.length - 1 ? 'disabled' : ''}>↓</button>
+                <button type="button" class="btn btn-danger-outline btn-xs" style="padding:1px 5px;" title="刪除此時間點"
+                  onclick="removeMilestoneRow(${idx})">✕</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // Close modal on Escape key or clicking backdrop outside
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
+        }
+      });
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.addEventListener('click', (e) => {
+          if (e.target === backdrop) {
+            backdrop.classList.remove('open');
+          }
+        });
+      });
+
+      // Tab switching
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-section').forEach(s => s.classList.add('hidden'));
+          btn.classList.add('active');
+          document.getElementById(btn.dataset.tab).classList.remove('hidden');
+        });
+      });
+
+      // KPI Card filter clicks
+      document.querySelectorAll('.summary-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const statusSel = document.getElementById('statusFilter');
+          const target = card.dataset.filter;
+          statusSel.value = (statusSel.value === target) ? 'ALL' : target;
+          renderAll();
+        });
+      });
+
+      // Filters
+      ['studentFilter', 'studyFilter', 'statusFilter'].forEach(id => {
+        document.getElementById(id).addEventListener('change', renderAll);
+      });
+      document.getElementById('keywordSearch').addEventListener('input', renderAll);
+
+      // Reference Date
+      document.getElementById('refDateInput').addEventListener('change', (e) => {
+        if (e.target.value) {
+          appData.refDate = e.target.value;
+          saveData();
+          renderAll();
+        }
+      });
+      document.getElementById('resetTodayBtn').addEventListener('click', () => {
+        appData.refDate = '2026-10-24';
+        saveData();
+        renderAll();
+      });
+
+      // Calendar navigation
+      document.getElementById('calPrevBtn').addEventListener('click', () => {
+        calMonth--;
+        if (calMonth < 1) { calMonth = 12; calYear--; }
+        renderAll();
+      });
+      document.getElementById('calNextBtn').addEventListener('click', () => {
+        calMonth++;
+        if (calMonth > 12) { calMonth = 1; calYear++; }
+        renderAll();
+      });
+      document.getElementById('calJumpRefBtn').addEventListener('click', () => {
+        const [y, m] = (appData.refDate || '2026-10-24').split('-').map(Number);
+        calYear = y;
+        calMonth = m;
+        renderAll();
+      });
+
+      // Header Buttons
+      document.getElementById('openAddSubjectBtn').addEventListener('click', () => openAddSubjectModal());
+      document.getElementById('openAddStudyBtn').addEventListener('click', () => openCreateStudyModal());
+      document.getElementById('openManageMembersBtn').addEventListener('click', () => openManageMembersModal());
+
+      // Mark all past dates as Done
+      document.getElementById('markPastDoneBtn').addEventListener('click', () => {
+        const ref = appData.refDate || '2026-10-24';
+        if (!confirm(`是否將所有早於基準日 (${ref}) 的過往階段與評估一鍵標記為「已完成 ✓」？\n（您之後仍可隨時單獨切換任何項目的完成／逾期狀態）`)) return;
+
+        appData.optBone.forEach(r => {
+          [['t1Date','t1Done'],['p1End','p1EndDone'],['t2Date','t2Done'],['washEnd','washEndDone'],['t3Date','t3Done'],['p2End','p2EndDone'],['t4Date','t4Done']].forEach(([df, dnf]) => {
+            if (r[df] && diffDays(r[df], ref) < 0) r[dnf] = true;
+          });
+        });
+        appData.music40.forEach(r => {
+          [['endDate','endDone'],['followDate','followDone'],['eval1Date','eval1Done'],['quiz1Date','quiz1Done'],['eval2Date','eval2Done'],['quiz2Date','quiz2Done'],['eval3Date','eval3Done'],['quiz3Date','quiz3Done']].forEach(([df, dnf]) => {
+            if (r[df] && diffDays(r[df], ref) < 0) r[dnf] = true;
+          });
+        });
+        (appData.customStudies || []).forEach(st => {
+          (st.subjects || []).forEach(sub => {
+            Object.values(sub.items || {}).forEach(it => {
+              if (it.date && diffDays(it.date, ref) < 0) it.done = true;
+            });
+          });
+        });
+        saveData();
+        renderAll();
+      });
+
+      // Fill blank music40 questionnaire dates with corresponding evaluation dates
+      document.getElementById('fillMusic40QuizDatesBtn').addEventListener('click', () => {
+        appData.music40.forEach(r => {
+          if (!r.quiz1Date && r.eval1Date) r.quiz1Date = r.eval1Date;
+          if (!r.quiz2Date && r.eval2Date) r.quiz2Date = r.eval2Date;
+          if (!r.quiz3Date && r.eval3Date) r.quiz3Date = r.eval3Date;
+        });
+        saveData();
+        renderAll();
+      });
+
+      // Add Subject Form Submit
+      document.getElementById('addSubjectForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const study = document.getElementById('newSubStudy').value;
+        const id = document.getElementById('newSubId').value.trim();
+        const name = document.getElementById('newSubName').value.trim();
+        const owner1 = document.getElementById('newSubPrimaryOwner').value.trim() || 'HJ';
+        const owner2 = document.getElementById('newSubSecondOwner').value.trim() || '潔';
+        const start = document.getElementById('newSubStartDate').value;
+
+        if (study === 'OPT_Bone') {
+          appData.optBone.push({
+            id, name, screenDate: start || '',
+            t1Date: start || '', t1Owner: owner1, t1Done: false,
+            p1Start: start || '', p1End: start ? addDays(start, 28) : '', p1EndOwner: owner1, p1EndDone: false,
+            t2Date: '', t2Owner: owner1, t2Done: false,
+            washStart: '', washEnd: '', washEndOwner: owner1, washEndDone: false,
+            t3Date: '', t3Owner: owner1, t3Done: false,
+            p2Start: '', p2End: '', p2EndOwner: owner1, p2EndDone: false,
+            t4Date: '', t4Owner: owner1, t4Done: false
+          });
+          document.querySelector('[data-tab="tab-opt-bone"]').click();
+        } else if (study === 'music40') {
+          appData.music40.push({
+            id, name, startDate: start || '',
+            endDate: start ? addDays(start, 90) : '', endOwner: owner1, endDone: false,
+            followDate: start ? addDays(start, 180) : '', followOwner: owner1, followDone: false,
+            eval1Date: start || '', eval1Owner: owner1, eval1Done: false,
+            quiz1Date: start || '', quiz1Owner: owner2, quiz1Done: false,
+            eval2Date: start ? addDays(start, 90) : '', eval2Owner: owner1, eval2Done: false,
+            quiz2Date: '', quiz2Owner: owner2, quiz2Done: false,
+            eval3Date: start ? addDays(start, 180) : '', eval3Owner: owner1, eval3Done: false,
+            quiz3Date: '', quiz3Owner: owner2, quiz3Done: false
+          });
+          document.querySelector('[data-tab="tab-music40"]').click();
+        } else {
+          const stObj = (appData.customStudies || []).find(s => s.code === study);
+          if (stObj) {
+            const items = {};
+            (stObj.milestones || []).forEach(m => {
+              items[m.key] = {
+                date: start ? addDays(start, m.offsetDays) : '',
+                owner: m.owner || owner1 || stObj.defaultOwner,
+                done: false
+              };
+            });
+            stObj.subjects.push({ id, name, startDate: start || '', items });
+            document.querySelector('[data-tab="tab-custom"]').click();
+          }
+        }
+        saveData();
+        closeModal('addSubjectModal');
+        renderAll();
+      });
+
+      // Add Member Form Submit
+      document.getElementById('addMemberForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('newMemId').value.trim();
+        const name = document.getElementById('newMemName').value.trim() || id;
+        const role = document.getElementById('newMemRole').value.trim() || '研究團隊成員';
+
+        if (!id) return;
+        if (!appData.members) appData.members = [];
+
+        if (appData.members.some(m => m.id.toLowerCase() === id.toLowerCase())) {
+          alert(`成員代號「${id}」已存在於名冊中！`);
+          return;
+        }
+
+        appData.members.push({ id, name, role });
+        saveData();
+        document.getElementById('newMemId').value = '';
+        document.getElementById('newMemName').value = '';
+        document.getElementById('newMemRole').value = '';
+        renderMemberListTable();
+        renderAll();
+      });
+
+      // Study Config Form Submit (Create or Edit Study & Milestones)
+      document.getElementById('studyConfigForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const code = document.getElementById('studyCodeInput').value.trim();
+        const desc = document.getElementById('studyDescInput').value.trim();
+        const defaultOwner = document.getElementById('studyDefaultOwnerSelect').value.trim() || 'HJ';
+        const editIdx = Number(document.getElementById('editStudyIndex').value);
+
+        if (!code) {
+          alert('請輸入研究案名稱／代碼！');
+          return;
+        }
+        if (editingMilestones.length === 0) {
+          alert('請至少設定一個追蹤時間點！');
+          return;
+        }
+        for (let i = 0; i < editingMilestones.length; i++) {
+          if (!editingMilestones[i].label.trim()) {
+            alert(`第 ${i + 1} 個時間點的名稱不可為空白！`);
+            return;
+          }
+        }
+
+        if (!appData.customStudies) appData.customStudies = [];
+
+        if (editIdx >= 0 && editIdx < appData.customStudies.length) {
+          // EDIT EXISTING STUDY
+          const stObj = appData.customStudies[editIdx];
+          stObj.code = code;
+          stObj.description = desc;
+          stObj.defaultOwner = defaultOwner;
+          stObj.milestones = JSON.parse(JSON.stringify(editingMilestones));
+
+          // Reconcile milestones for all existing subjects in this study
+          (stObj.subjects || []).forEach(sub => {
+            if (!sub.items) sub.items = {};
+            stObj.milestones.forEach(m => {
+              if (!sub.items[m.key]) {
+                sub.items[m.key] = {
+                  date: sub.startDate ? addDays(sub.startDate, m.offsetDays) : '',
+                  owner: m.owner || defaultOwner,
+                  done: false
+                };
+              }
+            });
+          });
+          alert(`研究案「${code}」與時間點設定已更新！`);
+        } else {
+          // CREATE NEW STUDY
+          if (appData.customStudies.some(s => s.code.toLowerCase() === code.toLowerCase()) || code === 'OPT_Bone' || code === 'music40') {
+            alert(`研究案代碼「${code}」已存在，請使用不同名稱！`);
+            return;
+          }
+          appData.customStudies.push({
+            code,
+            description: desc,
+            defaultOwner,
+            milestones: JSON.parse(JSON.stringify(editingMilestones)),
+            subjects: []
+          });
+          alert(`研究案「${code}」建立成功！`);
+        }
+
+        saveData();
+        closeModal('studyConfigModal');
+        document.querySelector('[data-tab="tab-custom"]').click();
+        renderAll();
+      });
+
+      // Export JSON
+      document.getElementById('exportJsonBtn').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `zheng-lab-dashboard-backup-${appData.refDate || '2026-10-24'}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // Import JSON
+      document.getElementById('importJsonInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const parsed = JSON.parse(ev.target.result);
+            if (parsed && parsed.optBone && parsed.music40) {
+              appData = parsed;
+              saveData();
+              renderAll();
+              alert('資料匯入成功！');
+            } else {
+              alert('JSON 檔案格式不符。');
+            }
+          } catch (err) {
+            alert('讀取 JSON 失敗：' + err.message);
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      // Reset to Default Excel Data
+      document.getElementById('resetDefaultBtn').addEventListener('click', () => {
+        if (!confirm('確定要還原為 Excel 檔案的初始個案資料嗎？這將會覆蓋您目前在瀏覽器中新增或修改的紀錄。')) return;
+        appData = getDefaultData();
+        saveData();
+        renderAll();
+      });
+
+      renderAll();
+    });
+  </script>
+</body>
+</html>
