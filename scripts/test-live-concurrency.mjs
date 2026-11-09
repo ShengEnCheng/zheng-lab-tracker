@@ -26,10 +26,9 @@ const [a, b] = await Promise.all([api('/data', token1), api('/data', token2)]);
 if (a.status !== 200 || b.status !== 200) throw new Error(`兩帳號讀取失敗：${a.status}/${b.status}`);
 if (a.payload.revision !== b.payload.revision) throw new Error(`初始 revision 不一致：${a.payload.revision}/${b.payload.revision}`);
 const baseRevision = a.payload.revision;
+// Use identical snapshots so the test changes no business data; only revision conflict behavior is exercised.
 const dataA = structuredClone(a.payload.data);
-dataA.__concurrencyTest = { actor: 'A', at: new Date().toISOString() };
 const dataB = structuredClone(b.payload.data);
-dataB.__concurrencyTest = { actor: 'B', at: new Date().toISOString() };
 const [writeA, writeB] = await Promise.all([
   api('/data', token1, { method: 'POST', body: JSON.stringify({ baseRevision, requestId: crypto.randomUUID(), data: dataA }) }),
   api('/data', token2, { method: 'POST', body: JSON.stringify({ baseRevision, requestId: crypto.randomUUID(), data: dataB }) })

@@ -19,7 +19,8 @@
     "test:live:concurrency": "node scripts/test-live-concurrency.mjs",
     "test:live:restore": "node scripts/test-restore-rehearsal.mjs",
     "verify:vercel": "node scripts/verify-vercel-cron.mjs",
-    "check:roles": "node scripts/check-roles.mjs"
+    "check:roles": "node scripts/check-roles.mjs",
+    "test:ui": "node scripts/test-ui-smoke.mjs"
   },
   "engines": {
     "node": ">=20"
