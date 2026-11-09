@@ -1,7 +1,7 @@
 # 鄭老師研究室｜多案實驗管理與收案示警儀表板
 
 > **專為臨床醫學工程／復健科學研究室打造的收案追蹤與示警管理系統。**  
-> 純前端零後端依賴、本機離線安全持久化、支援 GitHub Pages 免費即時託管。
+> 目前為純前端、單機／受控環境版本；正式研究資料尚未支援多人即時同步，不可直接部署到公開 GitHub Pages。
 
 ![儀表板預覽](preview.png)
 
@@ -29,7 +29,7 @@
    - **OPT_Bone 自動 +28 天推算**：輸入各階段開始日期時，系統自動推算結束日為 `開始日 + 28 天`，亦保留手動彈性微調。
    - **T1 ～ T4 重大收案急件前 2 天閃爍**：紅燈高頻呼吸閃爍（`@keyframes pulse-red`），月曆當日方格加粗紅框醒目提示。
    - **music40 問卷日期彈性排程**：初／二／三次問卷日期可任意自訂，或一鍵「同評估日」快速帶入。
-   - **逾期自動判定與歷史批次結案**：早於基準日且未完成者自動置頂標記為「逾期未完成」，並支援「✓ 過往日期標為已完成」。
+   - **逾期自動判定**：早於基準日且未完成者自動置頂標記為「逾期未完成」，完成狀態只能由使用者逐筆人工確認。
 7. **資料安全與備份**：
    - 採用瀏覽器 `localStorage` 即時自動儲存，重整或關閉瀏覽器資料不遺失。
    - 頂部支援「匯出備份（JSON）」與「匯入資料」，方便跨裝置或與實驗室同學同步進度。
@@ -41,16 +41,9 @@
 ### 方式一：直接在本機開啟
 在 Finder 雙擊或將 [index.html](index.html) 拖入 Chrome、Safari、Edge 等任一瀏覽器即可開始使用。
 
-### 方式二：透過 GitHub Pages 建立實驗室線上網址（推薦）
-將此專案推播至 GitHub 後，研究室成員無需下載檔案，手機與電腦隨時皆可使用：
-1. 進入您的 GitHub 專案倉庫頁面。
-2. 點擊頂部 **Settings** ➔ 側邊欄點選 **Pages**。
-3. 在 **Build and deployment** 區塊：
-   - **Source**: 選擇 `Deploy from a branch`。
-   - **Branch**: 選擇 `main`，資料夾選擇 `/ (root)`。
-   - 點擊 **Save**。
-4. 等待 1~2 分鐘，即可獲得實驗室專屬網址：  
-   `https://<你的 GitHub 帳號>.github.io/<倉庫名稱>/`
+### 方式二：建立公開 Demo（僅限假資料）
+本專案目前沒有登入、權限、多人同步或伺服器端衝突控制。若部署到 GitHub Pages，只能使用不含研究資料的 DEMO fixture；正式研究資料不可直接放在公開 GitHub Pages。
+如需展示介面，請先移除真實 `index.html`／`initial-data.json` 中的研究資料，改用 `DEMO-001` 等假資料，再依 GitHub Pages 官方流程部署。正式資料版本須等 Phase 0 權限確認與多人後端 PoC 完成後，部署至經核准且具存取控制的環境。
 
 ---
 
@@ -58,8 +51,13 @@
 
 ```text
 zheng-lab-tracker/
-├── index.html          # 系統主程式（包含完整 UI、邏輯與樣式）
-├── initial-data.json   # 初始 Excel 匯入個案與研究案 JSON 備份檔
+├── index.html          # 目前前端 UI 與研究流程（重構中的 legacy entry）
+├── initial-data.json   # 開發／遷移 fixture，不是正式公開資料
+├── api/                # Vercel API：資料、匯入、還原、備份與健康檢查
+├── src/lib/            # 資料存取、Supabase Auth 與共用 schema 驗證模組
+├── supabase/           # PostgreSQL／角色／revision／稽核 migration
+├── vercel.json         # Vercel Functions 與備份排程
+├── .env.example        # 後端環境變數範本
 ├── preview.png         # 儀表板高解析度預覽截圖
 ├── README.md           # 專案首頁說明與操作指南
 └── .gitignore          # 排除 Mac .DS_Store 等垃圾檔案
@@ -83,12 +81,74 @@ zheng-lab-tracker/
 ## 💾 資料備份與跨成員協作
 
 - **自動本機持久化**：每次點擊完成、新增受試者或修改日期，右上角即刻更新至 `localStorage`。
-- **跨成員共享**：
-  1. 負責人點擊頂部 **「匯出備份」**，瀏覽器會自動下載名為 `zheng-lab-followup-YYYY-MM-DD.json` 的檔案。
-  2. 其他同學點擊 **「匯入資料」** 選取該檔案，系統即可完整還原最新的受試者排程與勾選紀錄。
-  3. 若需重新匯入 Excel 初始狀態，可隨時點擊 **「還原預設」** 或匯入本倉庫所附之 `initial-data.json`。
+- **人工備份／轉移**：
+  1. 使用者點擊頂部 **「匯出備份」**，瀏覽器下載帶有時間戳的 JSON 備份檔。
+  2. 其他使用者可點擊 **「匯入資料」**；系統會先驗證格式、顯示摘要並要求確認，取消不會改變目前資料。
+  3. 匯入覆蓋前會先建立匯入前快照；目前仍不是即時共用資料庫，也沒有自動雲端備份。
+  4. `initial-data.json` 僅供開發／遷移 fixture，不提供一般使用者一鍵還原。
+
+> **跨電腦同步說明**：目前版本的 `localStorage` 只存在於單一瀏覽器／裝置，JSON 匯出／匯入是人工同步機制，並非即時共用資料庫。若要多人同時編輯與自動備份，下一階段應接上具身分驗證、版本／衝突處理及定期備份的共用後端；不建議直接把 Google Drive API 金鑰放在公開的靜態頁面。
 
 ---
+
+## 🧱 Vercel 後端化狀態
+
+本專案已開始從單一靜態頁面升級為可部署至 Vercel 的前後端架構：
+
+- `api/health.js`：部署健康檢查。
+- `api/data.js`：登入後的共用資料讀取與 revision 衝突阻擋寫入。
+- `api/import.js`、`api/restore.js`：管理權限匯入／還原 API。
+- `api/backup.js`、`api/backups.js`：每日備份與備份清單 API。
+- `supabase/migrations/001_lab_state.sql`：角色、主資料、revision、備份與稽核資料表及交易函式。
+- `vercel.json`：API Function 與每日備份排程設定。
+- `.env.example`：Supabase 與 Vercel 環境變數範本。
+
+目前後端已完成 Supabase Auth、RLS、共用資料、revision 衝突阻擋、requestId 冪等、稽核、匯入前快照、還原前快照、checksum 與備份健康記錄的 PoC；仍不代表正式多人系統已上線。正式啟用前必須在核准的 Supabase 專案執行 migration，設定 Vercel 環境變數、email 白名單與管理者帳號，並完成兩帳號衝突測試、備份失敗測試、checksum 還原拒絕測試及實際回復演練。若未設定後端，現有網頁仍以受控環境的 localStorage 模式運作。
+
+### 後端啟用順序
+
+1. 在你的 Supabase 測試專案執行 `supabase/migrations/001_lab_state.sql`；目前只使用假資料，不匯入正式研究資料。
+2. 複製 `.env.example` 為 `.env.local`，填入測試專案 URL 與 anon public key；可執行 `npm run check:env` 檢查格式，工具不會輸出 key 內容。
+3. 若測試管理員 API，再把 `SUPABASE_SERVICE_ROLE_KEY` 放入本機 `.env.local` 或 Vercel Server-only Environment Variables，絕不放入前端或提交 Git。
+4. 建立 `lab_profiles` 管理者、備援管理者與研究人員帳號。
+5. 先以 `/api/health`、`/api/data`、`/api/backup` 測試資料服務；前端已支援受控 runtime 設定 `window.__ZHENG_LAB_BACKEND__ = { enabled: true, apiBase: '/api', token: '<short-lived-user-token>' }` 後切換至共用 API。Token 不得寫入 Git、HTML 原始碼或公開環境變數。正式前端登入需在部署頁面以受控 runtime 設定 `window.__ZHENG_LAB_AUTH__ = { supabaseUrl: 'https://<project>.supabase.co', anonKey: '<public-anon-key>' }`；anon key 可公開，但密碼、access token 與 service role key 不可放入前端。登入後 session 會儲存在瀏覽器並在過期前自動 refresh。
+6. 第二階段可先執行 `npm run supabase:seed:demo` 寫入完全匿名化的 `DEMO-001`～`DEMO-003`；此命令會將 `lab_state` 重設為 revision 1，僅限個人測試專案使用。
+7. 在 Supabase Authentication → Users 建立測試使用者（建議開啟 Auto Confirm），再於 `.env.local` 設定 `DEMO_AUTH_EMAIL` 與 `DEMO_AUTH_ROLE`，執行 `npm run supabase:assign:profile` 建立 `lab_profiles` 角色；前端才可用短期 user token 啟用 API 模式。以假資料完成 B01–B14，未完成權限與備份演練前不得匯入正式研究資料。
+
+## 🧪 上線前演練指令
+
+完成 Vercel Production 部署與第二個測試帳號後，可在本機以環境變數執行：
+
+```bash
+# 兩帳號同 revision 衝突測試
+ZHENG_API_BASE=https://<project>.vercel.app/api \
+DEMO_AUTH_PASSWORD='帳號一密碼' \
+DEMO_AUTH_EMAIL_2='second@example.edu' \
+DEMO_AUTH_PASSWORD_2='帳號二密碼' \
+npm run test:live:concurrency
+
+# Vercel health 與備份端點驗證
+CRON_SECRET='與 Vercel 相同的 secret' \
+npm run verify:vercel -- https://<project>.vercel.app
+
+# 備份／checksum／還原前快照演練（明確設定 YES 才會執行）
+RUN_RESTORE_REHEARSAL=YES \
+ZHENG_API_BASE=https://<project>.vercel.app/api \
+DEMO_ADMIN_ACCESS_TOKEN='短期 admin access token' \
+CRON_SECRET='與 Vercel 相同的 secret' \
+npm run test:live:restore
+```
+
+演練只可使用匿名 Demo 資料；`test-live:restore` 會提高 revision 並還原測試備份，不得在尚未建立快照與核准窗口前對正式研究資料執行。
+
+正式部署前的檢查包括：
+
+```bash
+npm run check
+npm test
+npm run test:contracts
+npm run check:fixtures
+```
 
 ## 📜 授權與研究室標註
 

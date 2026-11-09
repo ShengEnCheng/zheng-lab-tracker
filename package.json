@@ -1,0 +1,27 @@
+{
+  "name": "zheng-lab-tracker",
+  "private": true,
+  "version": "0.2.0",
+  "description": "鄭老師研究室多案實驗管理與收案示警儀表板",
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/check-project.mjs",
+    "check:env": "node scripts/check-env.mjs",
+    "supabase:migrate": "node scripts/run-supabase-migration.mjs",
+    "supabase:seed:demo": "node scripts/seed-supabase-demo.mjs",
+    "supabase:create:auth": "node scripts/create-demo-auth-user.mjs",
+    "supabase:confirm:auth": "node scripts/confirm-demo-auth-user.mjs",
+    "supabase:assign:profile": "node scripts/assign-demo-profile.mjs",
+    "supabase:test:auth": "node scripts/test-supabase-auth.mjs",
+    "test": "python3 test_runner.py",
+    "test:contracts": "node scripts/test-backend-contracts.mjs",
+    "check:fixtures": "node scripts/check-demo-fixtures.mjs",
+    "test:live:concurrency": "node scripts/test-live-concurrency.mjs",
+    "test:live:restore": "node scripts/test-restore-rehearsal.mjs",
+    "verify:vercel": "node scripts/verify-vercel-cron.mjs",
+    "check:roles": "node scripts/check-roles.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

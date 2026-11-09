@@ -21,3 +21,9 @@ yarn-error.log*
 scratch/
 tmp/
 temp/
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+.vercel

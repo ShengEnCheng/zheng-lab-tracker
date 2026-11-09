@@ -559,11 +559,11 @@
       color: #1e40af;
       border: 1px solid #bfdbfe;
     }
-    .student-pill.s-HJ { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
-    .student-pill.s-CI { background: #ede9fe; color: #5b21b6; border-color: #c4b5fd; }
-    .student-pill.s-昊 { background: #fef3c7; color: #92400e; border-color: #fde68a; }
-    .student-pill.s-潔 { background: #fce7f3; color: #9d174d; border-color: #fbcfe8; }
-    .student-pill.s-紳 { background: #dcfce7; color: #166534; border-color: #86efac; }
+    .student-pill.s-DEMO-A { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+    .student-pill.s-DEMO-B { background: #ede9fe; color: #5b21b6; border-color: #c4b5fd; }
+    .student-pill.s-DEMO-C { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+    .student-pill.s-DEMO-D { background: #fce7f3; color: #9d174d; border-color: #fbcfe8; }
+    .student-pill.s-DEMO-E { background: #dcfce7; color: #166534; border-color: #86efac; }
 
     @keyframes pulse-red {
       0%, 100% {
@@ -1187,6 +1187,13 @@
     }
 
     .hidden { display: none !important; }
+    .empty-state {
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+      min-height:96px; padding:18px; text-align:center; color:var(--muted);
+      background:var(--slate-soft); border:1px dashed var(--line); border-radius:8px;
+    }
+    .empty-state strong { color:var(--ink-light); }
+    .empty-state-filter { font-size:11px; color:var(--muted); }
 
     @media (max-width: 1024px) {
       .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -1214,11 +1221,15 @@
       </div>
 
       <div class="header-controls">
-        <div class="status-live-pill" title="所有操作即時自動存入本機瀏覽器"><span class="live-dot"></span>本機即時儲存</div>
-        <div class="date-control" title="所有紅黃綠燈與逾期判定皆以此基準日計算">
+        <div class="status-live-pill" id="syncStatusPill" title="目前資料來源與同步狀態"><span class="live-dot"></span><span id="syncStatusText">本機模式</span></div>
+        <span id="authUserText" class="muted" style="font-size:11px;"></span>
+         <button class="btn btn-secondary btn-xs" id="authButton" type="button">登入</button>
+         <button class="btn btn-secondary btn-xs hidden" id="syncNowBtn" type="button" title="從共用後端重新載入最新資料">↻ 同步資料</button>
+        <div class="date-control" title="所有紅DEMO-102綠燈與逾期判定皆以此基準日計算">
           <span>📅 判定基準日：</span>
-          <input type="date" id="refDateInput" value="2026-10-24">
+          <input type="date" id="refDateInput" value="">
           <button class="btn btn-secondary btn-xs" id="resetTodayBtn" type="button">設為今日</button>
+          <span id="dateRolloverNotice" class="hidden" style="font-size:11px; color:#fde68a;" role="status">今日已變更，按「設為今日」更新</span>
         </div>
         <div class="btn-group-primary">
           <button class="btn btn-primary" id="openAddSubjectBtn" type="button">＋ 新增個案</button>
@@ -1226,12 +1237,11 @@
           <button class="btn btn-indigo" id="openManageMembersBtn" type="button" title="管理實驗室成員與學生名冊">👥 人員名冊</button>
         </div>
         <div class="btn-group-util">
-          <button class="btn btn-secondary btn-xs" id="markPastDoneBtn" type="button" title="將早於基準日的所有過往日期一鍵標記為已完成">✓ 標記過往完成</button>
+          <button class="btn btn-secondary btn-xs" id="clearFiltersBtn" type="button" title="清除篩選、回到收案待辦並將基準日設為今日">⌂ 回到首頁／清除篩選</button>
           <button class="btn btn-secondary btn-xs" id="exportJsonBtn" type="button">匯出備份</button>
           <label class="btn btn-secondary btn-xs" style="margin:0; cursor:pointer;" title="匯入已備份的 JSON 檔案">
             匯入資料 <input type="file" id="importJsonInput" accept=".json" style="display:none;">
           </label>
-          <button class="btn btn-secondary btn-xs" id="resetDefaultBtn" type="button" title="還原為 Excel 原始個案資料">還原預設</button>
         </div>
       </div>
     </div>
@@ -1257,17 +1267,17 @@
           <label for="statusFilter">🚦 示警狀態：</label>
           <select id="statusFilter">
             <option value="ALL">全部狀態</option>
-            <option value="ACTION_NEEDED">所有待辦示警 (逾期+紅+黃+綠)</option>
+            <option value="ACTION_NEEDED">所有待辦示警 (逾期+紅+DEMO-102+綠)</option>
             <option value="OVERDUE">逾期未完成</option>
             <option value="RED_T">T1~T4 收案急件 (≤2天閃燈)</option>
             <option value="RED">紅燈 (1週內 / ≤7天)</option>
-            <option value="AMBER">黃燈 (2~3週內)</option>
+            <option value="AMBER">DEMO-102燈 (2~3週內)</option>
             <option value="GREEN">綠燈 (3週前提醒)</option>
             <option value="DONE">已完成 ✓</option>
           </select>
         </div>
         <div class="filter-item">
-          <input type="search" id="keywordSearch" placeholder="🔍 搜尋受試者編號 (如 S01, S19) 或姓名...">
+          <input type="search" id="keywordSearch" placeholder="🔍 搜尋受試者編號 (如 DEMO-01, DEMO-19) 或姓名...">
         </div>
       </div>
       <div style="font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px;">
@@ -1293,9 +1303,9 @@
         <div class="summary-value" id="kpiRed">0</div>
         <div class="summary-note">階段結束前 1 週內 ／ T1~T4 前 2 天</div>
       </article>
-      <article class="summary-card amber" data-filter="AMBER" title="點擊快速篩選黃燈項目">
+      <article class="summary-card amber" data-filter="AMBER" title="點擊快速篩選DEMO-102燈項目">
         <div class="summary-label">
-          <span class="summary-title"><span class="summary-icon">🟡</span>黃燈預警</span>
+          <span class="summary-title"><span class="summary-icon">🟡</span>DEMO-102燈預警</span>
           <span class="summary-action-badge">準備聯絡</span>
         </div>
         <div class="summary-value" id="kpiAmber">0</div>
@@ -1327,14 +1337,8 @@
       <button class="tab-btn" data-tab="tab-calendar" type="button">
         📅 實驗室收案月曆 (T點閃燈提示)
       </button>
-      <button class="tab-btn" data-tab="tab-opt-bone" type="button">
-        🦴 OPT_Bone 個案管理表 <span class="tab-pill-hint">+28天自動算</span> <span class="tab-count" id="tabCountOpt">0</span>
-      </button>
-      <button class="tab-btn" data-tab="tab-music40" type="button">
-        🎵 music40 個案管理表 <span class="tab-pill-hint">初/二/三次問卷</span> <span class="tab-count" id="tabCountMusic">0</span>
-      </button>
-      <button class="tab-btn" data-tab="tab-custom" type="button">
-        🧪 多期程研究案 <span class="tab-pill-hint">自訂時間點</span> <span class="tab-count" id="tabCountCustom">0</span>
+      <button class="tab-btn" data-tab="tab-management" type="button">
+        🗂️ 研究個案管理 <span class="tab-pill-hint">依上方研究案篩選</span> <span class="tab-count" id="tabCountManagement">0</span>
       </button>
     </nav>
 
@@ -1405,7 +1409,7 @@
         <div class="panel-body">
           <div class="rule-banner">
             <span><strong>📌 OPT_Bone 示警規則：</strong></span>
-            <span>1️⃣ <strong>階段結束聯絡評估（第一階段結束、washout結束、第二階段結束）</strong>：前 3 週🟢綠燈、前 2 週🟡黃燈、前 1 週🔴紅燈。</span>
+            <span>1️⃣ <strong>階段結束聯絡評估（第一階段結束、washout結束、第二階段結束）</strong>：前 3 週🟢綠燈、前 2 週🟡DEMO-102燈、前 1 週🔴紅燈。</span>
             <span>2️⃣ <strong>T1 ~ T4 收案提醒</strong>：前 2 天🔴紅燈閃爍，並於月曆加粗紅框。</span>
             <span>3️⃣ <strong>自動推算 +28 天</strong>：輸入或修改各階段「開始日期」時，會自動將結束日期設為 <code>開始日期 + 28 天</code>（您仍可隨時手動覆寫結束日期）。</span>
           </div>
@@ -1451,7 +1455,7 @@
         <div class="panel-body">
           <div class="rule-banner">
             <span><strong>📌 music40 示警規則：</strong></span>
-            <span>1️⃣ <strong>燈號區間</strong>：距離預定日 3 週以上🟢綠燈、2～3 週（8～21天）🟡黃燈、1 週內（≤7天）🔴紅燈、過期未勾選⚠️逾期未完成。</span>
+            <span>1️⃣ <strong>燈號區間</strong>：距離預定日 3 週以上🟢綠燈、2～3 週（8～21天）🟡DEMO-102燈、1 週內（≤7天）🔴紅燈、過期未勾選⚠️逾期未完成。</span>
             <span>2️⃣ <strong>提醒項目</strong>：預計結束日期、預計追蹤日期、初次評估/問卷、二次評估/問卷、三次評估/問卷。</span>
             <span>3️⃣ <strong>問卷日期設定</strong>：可自由選擇任意日期，或點選格子內的「同評估日」快速帶入。</span>
           </div>
@@ -1495,6 +1499,18 @@
   </main>
 
   <!-- MODAL: ADD SUBJECT -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="modal-card" style="max-width:420px;">
+      <div class="modal-head"><h3 class="modal-title">Supabase 共用資料登入</h3><button class="modal-close" type="button" onclick="closeModal('authModal')">×</button></div>
+      <form id="authForm">
+        <div class="form-row"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="username" required></div>
+        <div class="form-row"><label for="authPassword">密碼</label><input id="authPassword" type="password" autocomplete="current-password" required></div>
+        <p id="authMessage" class="muted" role="status">登入後才會讀取 Supabase 共用資料。</p>
+        <div class="modal-foot"><button class="btn btn-secondary" type="button" onclick="closeModal('authModal')">取消</button><button class="btn btn-primary" type="submit">登入並同步</button></div>
+      </form>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="addSubjectModal">
     <div class="modal">
       <div class="modal-head">
@@ -1509,24 +1525,24 @@
               <select id="newSubStudy" required></select>
             </div>
             <div class="form-field">
-              <label for="newSubId">受試者編號 (如 S24, S31)</label>
-              <input type="text" id="newSubId" placeholder="例如：S24" required>
+              <label for="newSubId">受試者編號 (如 DEMO-24, DEMO-31)</label>
+              <input type="text" id="newSubId" placeholder="例如：DEMO-24" required>
             </div>
             <div class="form-field">
               <label for="newSubName">姓名縮寫 ／ 姓氏</label>
               <input type="text" id="newSubName" placeholder="例如：WANG 或 王">
             </div>
             <div class="form-field">
-              <label for="newSubPrimaryOwner">主要負責學生</label>
-              <input type="text" id="newSubPrimaryOwner" list="labMembersDatalist" placeholder="選擇或輸入負責人 (如 HJ, CI)">
+              <label for="newSubPrimaryOwner">主要負責學生 <span style="color:#ef4444;">*</span></label>
+              <input type="text" id="newSubPrimaryOwner" list="labMembersDatalist" placeholder="請選擇或輸入負責人 (如 DEMO-A, DEMO-B)" required>
             </div>
             <div class="form-field">
               <label for="newSubStartDate">基準／第一階段開始日期 (選填，會自動推算後續節點)</label>
               <input type="date" id="newSubStartDate">
             </div>
             <div class="form-field" id="newSubSecondOwnerWrap">
-              <label for="newSubSecondOwner">次要／問卷負責學生 (music40 適用)</label>
-              <input type="text" id="newSubSecondOwner" list="labMembersDatalist" placeholder="選擇或輸入問卷負責人 (如 潔)">
+              <label for="newSubSecondOwner">次要負責學生（選填）</label>
+              <input type="text" id="newSubSecondOwner" list="labMembersDatalist" placeholder="選擇或輸入問卷負責人 (如 DEMO-D)">
             </div>
           </div>
           <div style="font-size:12px; color:var(--muted); background:#f8fafc; padding:10px; border-radius:6px;">
@@ -1605,7 +1621,7 @@
             </div>
             <div style="font-size:11px; color:var(--muted); margin-top:8px;">
               💡 示警規則說明：
-              <strong>一般提醒</strong> 為到期前 7 天紅燈、8～21 天黃燈、21 天以上綠燈；
+              <strong>一般提醒</strong> 為到期前 7 天紅燈、8～21 天DEMO-102燈、21 天以上綠燈；
               <strong>重大急件</strong> 額外在到期前 2 天發出<strong>閃爍紅燈與月曆粗外框</strong>提醒。
             </div>
           </div>
@@ -1631,15 +1647,15 @@
           <form id="addMemberForm" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
             <div style="flex:1; min-width:110px;" class="form-field">
               <label for="newMemId">代號／縮寫 <span style="color:#ef4444;">*</span></label>
-              <input type="text" id="newMemId" placeholder="例如：HJ, 豪, CI" required>
+              <input type="text" id="newMemId" placeholder="例如：DEMO-A, 豪, DEMO-B" required>
             </div>
             <div style="flex:1.5; min-width:140px;" class="form-field">
               <label for="newMemName">姓名／稱謂</label>
-              <input type="text" id="newMemName" placeholder="例如：林同學 或 H.J. Lin">
+              <input type="text" id="newMemName" placeholder="例如：DEMO-108同學 或 H.J. Lin">
             </div>
             <div style="flex:1.5; min-width:140px;" class="form-field">
               <label for="newMemRole">角色／負責項目</label>
-              <input type="text" id="newMemRole" placeholder="例如：研究員 / 碩班生">
+              <input type="text" id="newMemRole" placeholder="例如：Demo member">
             </div>
             <button type="submit" class="btn btn-primary" style="height:35px; white-space:nowrap;">＋ 加入名冊</button>
           </form>
@@ -1698,29 +1714,29 @@
     // Initial Data directly parsed from 收案示警系統現有研究進行中個案整理_鄭老師研究室.xlsx
     function getDefaultData() {
       return {
-        refDate: '2026-10-24',
+        refDate: getTodayISO(),
         members: [
-          { id: 'HJ', name: 'HJ (同學)', role: '研究員 / 碩班生' },
-          { id: 'CI', name: 'CI (同學)', role: '研究員 / 碩班生' },
-          { id: '昊', name: '昊 (同學)', role: '研究員 / 碩班生' },
-          { id: '潔', name: '潔 (同學)', role: '問卷追蹤 / 碩班生' },
-          { id: '紳', name: '紳 (同學)', role: '研究員 / 碩班生' }
+          { id: 'DEMO-A', name: 'DEMO-A (同學)', role: 'Demo member' },
+          { id: 'DEMO-B', name: 'DEMO-B (同學)', role: 'Demo member' },
+          { id: 'DEMO-C', name: 'DEMO-C (同學)', role: 'Demo member' },
+          { id: 'DEMO-D', name: 'DEMO-D (同學)', role: 'Demo member' },
+          { id: 'DEMO-E', name: 'DEMO-E (同學)', role: 'Demo member' }
         ],
         optBone: [
           {
-            id: 'S01', name: 'LCW', screenDate: '2026-08-21',
-            t1Date: '2026-10-08', t1Owner: 'HJ', t1Done: true,
-            p1Start: '2026-10-13', p1End: '2026-11-07', p1EndOwner: 'HJ', p1EndDone: false,
-            t2Date: '2026-11-10', t2Owner: 'CI', t2Done: false,
-            washStart: '2026-11-11', washEnd: '2026-12-09', washEndOwner: 'CI', washEndDone: false,
+            id: 'DEMO-01', name: 'DEMO-001', screenDate: '2099-08-21',
+            t1Date: '2099-10-08', t1Owner: 'DEMO-A', t1Done: true,
+            p1Start: '2099-10-13', p1End: '2099-11-07', p1EndOwner: 'DEMO-A', p1EndDone: false,
+            t2Date: '2099-11-10', t2Owner: 'DEMO-B', t2Done: false,
+            washStart: '2099-11-11', washEnd: '2099-12-09', washEndOwner: 'DEMO-B', washEndDone: false,
             t3Date: '', t3Owner: '', t3Done: false,
             p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
             t4Date: '', t4Owner: '', t4Done: false
           },
           {
-            id: 'S04', name: 'STE', screenDate: '2026-08-26',
-            t1Date: '2026-10-21', t1Owner: 'CI', t1Done: false,
-            p1Start: '', p1End: '', p1EndOwner: 'CI', p1EndDone: false,
+            id: 'DEMO-04', name: 'DEMO-002', screenDate: '2099-08-26',
+            t1Date: '2099-10-21', t1Owner: 'DEMO-B', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: 'DEMO-B', p1EndDone: false,
             t2Date: '', t2Owner: '', t2Done: false,
             washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
             t3Date: '', t3Owner: '', t3Done: false,
@@ -1728,17 +1744,17 @@
             t4Date: '', t4Owner: '', t4Done: false
           },
           {
-            id: 'S05', name: 'TYH', screenDate: '2026-08-26',
-            t1Date: '2026-10-02', t1Owner: 'CI', t1Done: true,
-            p1Start: '2026-10-06', p1End: '2026-10-31', p1EndOwner: 'CI', p1EndDone: false,
-            t2Date: '2026-11-04', t2Owner: 'HJ', t2Done: false,
-            washStart: '2026-11-05', washEnd: '2026-12-03', washEndOwner: 'HJ', washEndDone: false,
+            id: 'DEMO-05', name: 'DEMO-003', screenDate: '2099-08-26',
+            t1Date: '2099-10-02', t1Owner: 'DEMO-B', t1Done: true,
+            p1Start: '2099-10-06', p1End: '2099-10-31', p1EndOwner: 'DEMO-B', p1EndDone: false,
+            t2Date: '2099-11-04', t2Owner: 'DEMO-A', t2Done: false,
+            washStart: '2099-11-05', washEnd: '2099-12-03', washEndOwner: 'DEMO-A', washEndDone: false,
             t3Date: '', t3Owner: '', t3Done: false,
             p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
             t4Date: '', t4Owner: '', t4Done: false
           },
           {
-            id: 'S07', name: 'PRY', screenDate: '2026-08-27',
+            id: 'DEMO-07', name: 'DEMO-004', screenDate: '2099-08-27',
             t1Date: '', t1Owner: '', t1Done: false,
             p1Start: '', p1End: '', p1EndOwner: '', p1EndDone: false,
             t2Date: '', t2Owner: '', t2Done: false,
@@ -1748,19 +1764,19 @@
             t4Date: '', t4Owner: '', t4Done: false
           },
           {
-            id: 'S08', name: 'CYF', screenDate: '2026-09-08',
-            t1Date: '2026-10-16', t1Owner: 'CI', t1Done: true,
-            p1Start: '2026-10-19', p1End: '2026-11-13', p1EndOwner: 'CI', p1EndDone: false,
-            t2Date: '2026-11-20', t2Owner: 'CI', t2Done: false,
-            washStart: '2026-11-21', washEnd: '2026-12-19', washEndOwner: 'CI', washEndDone: false,
+            id: 'DEMO-08', name: 'DEMO-005', screenDate: '2099-09-08',
+            t1Date: '2099-10-16', t1Owner: 'DEMO-B', t1Done: true,
+            p1Start: '2099-10-19', p1End: '2099-11-13', p1EndOwner: 'DEMO-B', p1EndDone: false,
+            t2Date: '2099-11-20', t2Owner: 'DEMO-B', t2Done: false,
+            washStart: '2099-11-21', washEnd: '2099-12-19', washEndOwner: 'DEMO-B', washEndDone: false,
             t3Date: '', t3Owner: '', t3Done: false,
             p2Start: '', p2End: '', p2EndOwner: '', p2EndDone: false,
             t4Date: '', t4Owner: '', t4Done: false
           },
           {
-            id: 'S09', name: 'SCW', screenDate: '2026-09-10',
-            t1Date: '2026-11-06', t1Owner: 'CI', t1Done: false,
-            p1Start: '', p1End: '', p1EndOwner: 'CI', p1EndDone: false,
+            id: 'DEMO-09', name: 'DEMO-006', screenDate: '2099-09-10',
+            t1Date: '2099-11-06', t1Owner: 'DEMO-B', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: 'DEMO-B', p1EndDone: false,
             t2Date: '', t2Owner: '', t2Done: false,
             washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
             t3Date: '', t3Owner: '', t3Done: false,
@@ -1768,9 +1784,9 @@
             t4Date: '', t4Owner: '', t4Done: false
           },
           {
-            id: 'S10', name: 'HPY', screenDate: '2026-09-11',
-            t1Date: '2026-10-30', t1Owner: 'CI', t1Done: false,
-            p1Start: '', p1End: '', p1EndOwner: 'CI', p1EndDone: false,
+            id: 'DEMO-10', name: 'DEMO-007', screenDate: '2099-09-11',
+            t1Date: '2099-10-30', t1Owner: 'DEMO-B', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: 'DEMO-B', p1EndDone: false,
             t2Date: '', t2Owner: '', t2Done: false,
             washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
             t3Date: '', t3Owner: '', t3Done: false,
@@ -1778,9 +1794,9 @@
             t4Date: '', t4Owner: '', t4Done: false
           },
           {
-            id: 'S11', name: 'LWJ', screenDate: '2026-09-16',
-            t1Date: '2026-10-30', t1Owner: 'CI', t1Done: false,
-            p1Start: '', p1End: '', p1EndOwner: 'CI', p1EndDone: false,
+            id: 'DEMO-11', name: 'DEMO-008', screenDate: '2099-09-16',
+            t1Date: '2099-10-30', t1Owner: 'DEMO-B', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: 'DEMO-B', p1EndDone: false,
             t2Date: '', t2Owner: '', t2Done: false,
             washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
             t3Date: '', t3Owner: '', t3Done: false,
@@ -1788,7 +1804,7 @@
             t4Date: '', t4Owner: '', t4Done: false
           },
           {
-            id: 'S12', name: 'CYC', screenDate: '2026-09-16',
+            id: 'DEMO-12', name: 'DEMO-009', screenDate: '2099-09-16',
             t1Date: '', t1Owner: '', t1Done: false,
             p1Start: '', p1End: '', p1EndOwner: '', p1EndDone: false,
             t2Date: '', t2Owner: '', t2Done: false,
@@ -1798,9 +1814,9 @@
             t4Date: '', t4Owner: '', t4Done: false
           },
           {
-            id: 'S13', name: 'HJS', screenDate: '2026-09-21',
-            t1Date: '2026-11-05', t1Owner: 'HJ', t1Done: false,
-            p1Start: '', p1End: '', p1EndOwner: 'HJ', p1EndDone: false,
+            id: 'DEMO-13', name: 'DEMO-010', screenDate: '2099-09-21',
+            t1Date: '2099-11-05', t1Owner: 'DEMO-A', t1Done: false,
+            p1Start: '', p1End: '', p1EndOwner: 'DEMO-A', p1EndDone: false,
             t2Date: '', t2Owner: '', t2Done: false,
             washStart: '', washEnd: '', washEndOwner: '', washEndDone: false,
             t3Date: '', t3Owner: '', t3Done: false,
@@ -1808,7 +1824,7 @@
             t4Date: '', t4Owner: '', t4Done: false
           },
           {
-            id: 'S15', name: 'JYJ', screenDate: '2026-09-22',
+            id: 'DEMO-15', name: 'DEMO-011', screenDate: '2099-09-22',
             t1Date: '', t1Owner: '', t1Done: false,
             p1Start: '', p1End: '', p1EndOwner: '', p1EndDone: false,
             t2Date: '', t2Owner: '', t2Done: false,
@@ -1818,7 +1834,7 @@
             t4Date: '', t4Owner: '', t4Done: false
           },
           {
-            id: 'S16', name: 'TYC', screenDate: '2026-09-24',
+            id: 'DEMO-16', name: 'DEMO-012', screenDate: '2099-09-24',
             t1Date: '', t1Owner: '', t1Done: false,
             p1Start: '', p1End: '', p1EndOwner: '', p1EndDone: false,
             t2Date: '', t2Owner: '', t2Done: false,
@@ -1830,157 +1846,157 @@
         ],
         music40: [
           {
-            id: 'S19', name: '許', startDate: '2026-04-15',
-            endDate: '2026-07-28', endOwner: '昊', endDone: true,
-            followDate: '2026-10-06', followOwner: '紳', followDone: true,
-            eval1Date: '2026-04-15', eval1Owner: '昊', eval1Done: true,
-            quiz1Date: '2026-04-15', quiz1Owner: '潔', quiz1Done: true,
-            eval2Date: '2026-07-29', eval2Owner: '昊', eval2Done: true,
-            quiz2Date: '2026-07-29', quiz2Owner: '潔', quiz2Done: true,
-            eval3Date: '2026-10-22', eval3Owner: '紳', eval3Done: false,
-            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+            id: 'DEMO-19', name: 'DEMO-101', startDate: '2099-04-15',
+            endDate: '2099-07-28', endOwner: 'DEMO-C', endDone: true,
+            followDate: '2099-10-06', followOwner: 'DEMO-E', followDone: true,
+            eval1Date: '2099-04-15', eval1Owner: 'DEMO-C', eval1Done: true,
+            quiz1Date: '2099-04-15', quiz1Owner: 'DEMO-D', quiz1Done: true,
+            eval2Date: '2099-07-29', eval2Owner: 'DEMO-C', eval2Done: true,
+            quiz2Date: '2099-07-29', quiz2Owner: 'DEMO-D', quiz2Done: true,
+            eval3Date: '2099-10-22', eval3Owner: 'DEMO-E', eval3Done: false,
+            quiz3Date: '', quiz3Owner: 'DEMO-D', quiz3Done: false
           },
           {
-            id: 'S20', name: '黃', startDate: '2026-06-22',
-            endDate: '2026-09-21', endOwner: '昊', endDone: true,
-            followDate: '2026-12-10', followOwner: '昊', followDone: false,
-            eval1Date: '2026-06-22', eval1Owner: '昊', eval1Done: true,
-            quiz1Date: '2026-06-22', quiz1Owner: '潔', quiz1Done: true,
-            eval2Date: '2026-09-22', eval2Owner: '昊', eval2Done: true,
-            quiz2Date: '2026-09-22', quiz2Owner: '潔', quiz2Done: true,
+            id: 'DEMO-20', name: 'DEMO-102', startDate: '2099-06-22',
+            endDate: '2099-09-21', endOwner: 'DEMO-C', endDone: true,
+            followDate: '2099-12-10', followOwner: 'DEMO-C', followDone: false,
+            eval1Date: '2099-06-22', eval1Owner: 'DEMO-C', eval1Done: true,
+            quiz1Date: '2099-06-22', quiz1Owner: 'DEMO-D', quiz1Done: true,
+            eval2Date: '2099-09-22', eval2Owner: 'DEMO-C', eval2Done: true,
+            quiz2Date: '2099-09-22', quiz2Owner: 'DEMO-D', quiz2Done: true,
             eval3Date: '', eval3Owner: '', eval3Done: false,
-            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+            quiz3Date: '', quiz3Owner: 'DEMO-D', quiz3Done: false
           },
           {
-            id: 'S21', name: '楊', startDate: '2026-06-22',
-            endDate: '2026-09-16', endOwner: '昊', endDone: true,
-            followDate: '2026-12-10', followOwner: '昊', followDone: false,
-            eval1Date: '2026-06-22', eval1Owner: '昊', eval1Done: true,
-            quiz1Date: '2026-06-22', quiz1Owner: '潔', quiz1Done: true,
-            eval2Date: '2026-09-17', eval2Owner: '昊', eval2Done: true,
-            quiz2Date: '2026-09-17', quiz2Owner: '潔', quiz2Done: true,
+            id: 'DEMO-21', name: 'DEMO-103', startDate: '2099-06-22',
+            endDate: '2099-09-16', endOwner: 'DEMO-C', endDone: true,
+            followDate: '2099-12-10', followOwner: 'DEMO-C', followDone: false,
+            eval1Date: '2099-06-22', eval1Owner: 'DEMO-C', eval1Done: true,
+            quiz1Date: '2099-06-22', quiz1Owner: 'DEMO-D', quiz1Done: true,
+            eval2Date: '2099-09-17', eval2Owner: 'DEMO-C', eval2Done: true,
+            quiz2Date: '2099-09-17', quiz2Owner: 'DEMO-D', quiz2Done: true,
             eval3Date: '', eval3Owner: '', eval3Done: false,
-            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+            quiz3Date: '', quiz3Owner: 'DEMO-D', quiz3Done: false
           },
           {
-            id: 'S22', name: '伍', startDate: '2026-10-02',
-            endDate: '2027-01-01', endOwner: '昊', endDone: false,
-            followDate: '2027-03-31', followOwner: '昊', followDone: false,
-            eval1Date: '2026-10-02', eval1Owner: '昊', eval1Done: true,
-            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            id: 'DEMO-22', name: 'DEMO-104', startDate: '2099-10-02',
+            endDate: '2099-01-01', endOwner: 'DEMO-C', endDone: false,
+            followDate: '2099-03-31', followOwner: 'DEMO-C', followDone: false,
+            eval1Date: '2099-10-02', eval1Owner: 'DEMO-C', eval1Done: true,
+            quiz1Date: '', quiz1Owner: 'DEMO-D', quiz1Done: false,
             eval2Date: '', eval2Owner: '', eval2Done: false,
-            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            quiz2Date: '', quiz2Owner: 'DEMO-D', quiz2Done: false,
             eval3Date: '', eval3Owner: '', eval3Done: false,
-            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+            quiz3Date: '', quiz3Owner: 'DEMO-D', quiz3Done: false
           },
           {
-            id: 'S23', name: '陳', startDate: '2026-10-05',
-            endDate: '2027-01-04', endOwner: '昊', endDone: false,
-            followDate: '2027-04-03', followOwner: '昊', followDone: false,
-            eval1Date: '2026-10-05', eval1Owner: '昊', eval1Done: true,
-            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            id: 'DEMO-23', name: 'DEMO-105', startDate: '2099-10-05',
+            endDate: '2099-01-04', endOwner: 'DEMO-C', endDone: false,
+            followDate: '2099-04-03', followOwner: 'DEMO-C', followDone: false,
+            eval1Date: '2099-10-05', eval1Owner: 'DEMO-C', eval1Done: true,
+            quiz1Date: '', quiz1Owner: 'DEMO-D', quiz1Done: false,
             eval2Date: '', eval2Owner: '', eval2Done: false,
-            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            quiz2Date: '', quiz2Owner: 'DEMO-D', quiz2Done: false,
             eval3Date: '', eval3Owner: '', eval3Done: false,
-            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+            quiz3Date: '', quiz3Owner: 'DEMO-D', quiz3Done: false
           },
           {
-            id: 'S24', name: '高', startDate: '2026-10-05',
-            endDate: '2027-01-04', endOwner: '昊', endDone: false,
-            followDate: '2027-04-03', followOwner: '昊', followDone: false,
-            eval1Date: '2026-10-05', eval1Owner: '昊', eval1Done: true,
-            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            id: 'DEMO-24', name: 'DEMO-106', startDate: '2099-10-05',
+            endDate: '2099-01-04', endOwner: 'DEMO-C', endDone: false,
+            followDate: '2099-04-03', followOwner: 'DEMO-C', followDone: false,
+            eval1Date: '2099-10-05', eval1Owner: 'DEMO-C', eval1Done: true,
+            quiz1Date: '', quiz1Owner: 'DEMO-D', quiz1Done: false,
             eval2Date: '', eval2Owner: '', eval2Done: false,
-            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            quiz2Date: '', quiz2Owner: 'DEMO-D', quiz2Done: false,
             eval3Date: '', eval3Owner: '', eval3Done: false,
-            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+            quiz3Date: '', quiz3Owner: 'DEMO-D', quiz3Done: false
           },
           {
-            id: 'S25', name: '黃', startDate: '2026-10-01',
-            endDate: '2026-12-31', endOwner: '昊', endDone: false,
-            followDate: '2027-03-30', followOwner: '昊', followDone: false,
-            eval1Date: '2026-10-01', eval1Owner: '昊', eval1Done: true,
-            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            id: 'DEMO-25', name: 'DEMO-102', startDate: '2099-10-01',
+            endDate: '2099-12-31', endOwner: 'DEMO-C', endDone: false,
+            followDate: '2099-03-30', followOwner: 'DEMO-C', followDone: false,
+            eval1Date: '2099-10-01', eval1Owner: 'DEMO-C', eval1Done: true,
+            quiz1Date: '', quiz1Owner: 'DEMO-D', quiz1Done: false,
             eval2Date: '', eval2Owner: '', eval2Done: false,
-            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            quiz2Date: '', quiz2Owner: 'DEMO-D', quiz2Done: false,
             eval3Date: '', eval3Owner: '', eval3Done: false,
-            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+            quiz3Date: '', quiz3Owner: 'DEMO-D', quiz3Done: false
           },
           {
-            id: 'S26', name: '蔡', startDate: '2026-10-01',
-            endDate: '2026-12-31', endOwner: '昊', endDone: false,
-            followDate: '2027-03-30', followOwner: '昊', followDone: false,
-            eval1Date: '2026-10-01', eval1Owner: '昊', eval1Done: true,
-            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            id: 'DEMO-26', name: 'DEMO-107', startDate: '2099-10-01',
+            endDate: '2099-12-31', endOwner: 'DEMO-C', endDone: false,
+            followDate: '2099-03-30', followOwner: 'DEMO-C', followDone: false,
+            eval1Date: '2099-10-01', eval1Owner: 'DEMO-C', eval1Done: true,
+            quiz1Date: '', quiz1Owner: 'DEMO-D', quiz1Done: false,
             eval2Date: '', eval2Owner: '', eval2Done: false,
-            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            quiz2Date: '', quiz2Owner: 'DEMO-D', quiz2Done: false,
             eval3Date: '', eval3Owner: '', eval3Done: false,
-            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+            quiz3Date: '', quiz3Owner: 'DEMO-D', quiz3Done: false
           },
           {
-            id: 'S27', name: '林', startDate: '',
-            endDate: '', endOwner: '紳', endDone: false,
-            followDate: '', followOwner: '紳', followDone: false,
-            eval1Date: '2026-10-19', eval1Owner: '紳', eval1Done: false,
-            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            id: 'DEMO-27', name: 'DEMO-108', startDate: '',
+            endDate: '', endOwner: 'DEMO-E', endDone: false,
+            followDate: '', followOwner: 'DEMO-E', followDone: false,
+            eval1Date: '2099-10-19', eval1Owner: 'DEMO-E', eval1Done: false,
+            quiz1Date: '', quiz1Owner: 'DEMO-D', quiz1Done: false,
             eval2Date: '', eval2Owner: '', eval2Done: false,
-            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            quiz2Date: '', quiz2Owner: 'DEMO-D', quiz2Done: false,
             eval3Date: '', eval3Owner: '', eval3Done: false,
-            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+            quiz3Date: '', quiz3Owner: 'DEMO-D', quiz3Done: false
           },
           {
-            id: 'S28', name: '李', startDate: '2026-10-19',
-            endDate: '2027-01-18', endOwner: '紳', endDone: false,
-            followDate: '2027-04-17', followOwner: '紳', followDone: false,
-            eval1Date: '2026-10-19', eval1Owner: '紳', eval1Done: false,
-            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            id: 'DEMO-28', name: 'DEMO-109', startDate: '2099-10-19',
+            endDate: '2099-01-18', endOwner: 'DEMO-E', endDone: false,
+            followDate: '2099-04-17', followOwner: 'DEMO-E', followDone: false,
+            eval1Date: '2099-10-19', eval1Owner: 'DEMO-E', eval1Done: false,
+            quiz1Date: '', quiz1Owner: 'DEMO-D', quiz1Done: false,
             eval2Date: '', eval2Owner: '', eval2Done: false,
-            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            quiz2Date: '', quiz2Owner: 'DEMO-D', quiz2Done: false,
             eval3Date: '', eval3Owner: '', eval3Done: false,
-            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+            quiz3Date: '', quiz3Owner: 'DEMO-D', quiz3Done: false
           },
           {
-            id: 'S29', name: '曾', startDate: '2026-10-19',
-            endDate: '2027-01-18', endOwner: '紳', endDone: false,
-            followDate: '2027-04-18', followOwner: '紳', followDone: false,
-            eval1Date: '2026-10-19', eval1Owner: '紳', eval1Done: false,
-            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            id: 'DEMO-29', name: 'DEMO-110', startDate: '2099-10-19',
+            endDate: '2099-01-18', endOwner: 'DEMO-E', endDone: false,
+            followDate: '2099-04-18', followOwner: 'DEMO-E', followDone: false,
+            eval1Date: '2099-10-19', eval1Owner: 'DEMO-E', eval1Done: false,
+            quiz1Date: '', quiz1Owner: 'DEMO-D', quiz1Done: false,
             eval2Date: '', eval2Owner: '', eval2Done: false,
-            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            quiz2Date: '', quiz2Owner: 'DEMO-D', quiz2Done: false,
             eval3Date: '', eval3Owner: '', eval3Done: false,
-            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+            quiz3Date: '', quiz3Owner: 'DEMO-D', quiz3Done: false
           },
           {
-            id: 'S30', name: '賴', startDate: '2026-10-19',
-            endDate: '2027-01-18', endOwner: '紳', endDone: false,
-            followDate: '2027-04-19', followOwner: '紳', followDone: false,
-            eval1Date: '2026-10-19', eval1Owner: '紳', eval1Done: false,
-            quiz1Date: '', quiz1Owner: '潔', quiz1Done: false,
+            id: 'DEMO-30', name: 'DEMO-111', startDate: '2099-10-19',
+            endDate: '2099-01-18', endOwner: 'DEMO-E', endDone: false,
+            followDate: '2099-04-19', followOwner: 'DEMO-E', followDone: false,
+            eval1Date: '2099-10-19', eval1Owner: 'DEMO-E', eval1Done: false,
+            quiz1Date: '', quiz1Owner: 'DEMO-D', quiz1Done: false,
             eval2Date: '', eval2Owner: '', eval2Done: false,
-            quiz2Date: '', quiz2Owner: '潔', quiz2Done: false,
+            quiz2Date: '', quiz2Owner: 'DEMO-D', quiz2Done: false,
             eval3Date: '', eval3Owner: '', eval3Done: false,
-            quiz3Date: '', quiz3Owner: '潔', quiz3Done: false
+            quiz3Date: '', quiz3Owner: 'DEMO-D', quiz3Done: false
           }
         ],
         customStudies: [
           {
-            code: 'MultiPeriod_Demo (1/3/6月範例)',
+            code: 'DEMO-STUDY-001',
             description: '標準 1/3/6 個月成果收案追蹤範例，依開始日自動推算各期程',
-            defaultOwner: 'HJ',
+            defaultOwner: 'DEMO-A',
             milestones: [
-              { key: 'm0', label: '初次基線收案', offsetDays: 0, rule: 'MUSIC40', owner: 'HJ' },
-              { key: 'm1', label: '1個月成果收案', offsetDays: 30, rule: 'MUSIC40', owner: 'HJ' },
-              { key: 'm2', label: '3個月成果收案', offsetDays: 90, rule: 'MUSIC40', owner: 'CI' },
-              { key: 'm3', label: '6個月成果收案', offsetDays: 180, rule: 'MUSIC40', owner: 'CI' }
+              { key: 'm0', label: '初次基線收案', offsetDays: 0, rule: 'MUSIC40', owner: 'DEMO-A' },
+              { key: 'm1', label: '1個月成果收案', offsetDays: 30, rule: 'MUSIC40', owner: 'DEMO-A' },
+              { key: 'm2', label: '3個月成果收案', offsetDays: 90, rule: 'MUSIC40', owner: 'DEMO-B' },
+              { key: 'm3', label: '6個月成果收案', offsetDays: 180, rule: 'MUSIC40', owner: 'DEMO-B' }
             ],
             subjects: [
               {
-                id: 'P01', name: '張(範例)', startDate: '2026-09-28',
+                id: 'P01', name: 'DEMO-201', startDate: '2099-09-28',
                 items: {
-                  m0: { date: '2026-09-28', owner: 'HJ', done: true },
-                  m1: { date: '2026-10-28', owner: 'HJ', done: false },
-                  m2: { date: '2026-12-27', owner: 'CI', done: false },
-                  m3: { date: '2027-03-27', owner: 'CI', done: false }
+                  m0: { date: '2099-09-28', owner: 'DEMO-A', done: true },
+                  m1: { date: '2099-10-28', owner: 'DEMO-A', done: false },
+                  m2: { date: '2099-12-27', owner: 'DEMO-B', done: false },
+                  m3: { date: '2099-03-27', owner: 'DEMO-B', done: false }
                 }
               }
             ]
@@ -1989,9 +2005,174 @@
       };
     }
 
+    function getTodayISO() {
+      // Keep date-only calculations anchored to the lab's Taiwan timezone.
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).formatToParts(new Date()).reduce((out, part) => { out[part.type] = part.value; return out; }, {});
+      return `${parts.year}-${parts.month}-${parts.day}`;
+    }
+
+    function getFilterSummary() {
+      const getText = id => document.getElementById(id)?.selectedOptions?.[0]?.textContent || '全部';
+      const keyword = document.getElementById('keywordSearch')?.value.trim();
+      return `研究案：${getText('studyFilter')}；負責學生：${getText('studentFilter')}；示警：${getText('statusFilter')}${keyword ? `；搜尋：${keyword}` : ''}`;
+    }
+
+    function renderNoResults(container, message = '目前篩選條件下沒有符合資料。') {
+      if (!container) return;
+      container.innerHTML = `<div class="empty-state" role="status"><strong>${escapeHtml(message)}</strong><div class="empty-state-filter">${escapeHtml(getFilterSummary())}</div><button type="button" class="btn btn-secondary btn-xs" onclick="document.getElementById('clearFiltersBtn').click()">清除篩選</button></div>`;
+    }
+
     var appData = loadData();
-    var calYear = 2026;
-    var calMonth = 10; // 1-12
+    // The reference date is a view-only setting; do not persist it as shared research data.
+    appData.refDate = getTodayISO();
+    var calYear = Number(appData.refDate.slice(0, 4));
+    var calMonth = Number(appData.refDate.slice(5, 7)); // 1-12
+    var openedDate = appData.refDate;
+    // The hosting environment may inject this object before the app boots:
+    // window.__ZHENG_LAB_BACKEND__ = { enabled: true, apiBase: '/api', token: '<short-lived-user-token>' };
+    const backendConfig = window.__ZHENG_LAB_BACKEND__ || {};
+    let remoteRevision = Number(backendConfig.revision || 0);
+    let remoteSaveTimer = null;
+
+    const AUTH_SESSION_KEY = 'ZHENG_LAB_AUTH_SESSION';
+    const authConfig = window.__ZHENG_LAB_AUTH__ || {};
+
+    function backendEnabled() {
+      return backendConfig.enabled === true && typeof backendConfig.token === 'string' && backendConfig.token.length > 0;
+    }
+
+    function readAuthSession() {
+      try {
+        const raw = localStorage.getItem(AUTH_SESSION_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch { return null; }
+    }
+
+    function setAuthSession(session) {
+      if (session) localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+      else localStorage.removeItem(AUTH_SESSION_KEY);
+      if (session?.access_token) {
+        backendConfig.enabled = true;
+        backendConfig.token = session.access_token;
+      } else {
+        backendConfig.enabled = false;
+        backendConfig.token = '';
+      }
+      const userText = document.getElementById('authUserText');
+      const button = document.getElementById('authButton');
+      const email = session?.user?.email || session?.email || '';
+      if (userText) userText.textContent = email ? `👤 ${email}` : '';
+      if (button) button.textContent = session?.access_token ? '登出' : '登入';
+    }
+
+    async function authRequest(path, body) {
+      if (!authConfig.supabaseUrl || !authConfig.anonKey) throw new Error('尚未設定前端 Supabase URL／anon key。');
+      const response = await fetch(`${String(authConfig.supabaseUrl).replace(/\/$/, '')}/auth/v1${path}`, {
+        method: 'POST', headers: { apikey: authConfig.anonKey, 'content-type': 'application/json' }, body: JSON.stringify(body)
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error_description || payload.msg || payload.message || `Auth ${response.status}`);
+      return payload;
+    }
+
+    async function refreshAuthSession(session) {
+      if (!session?.refresh_token) return session;
+      const expiresAt = Number(session.expires_at || 0) * 1000;
+      if (expiresAt && expiresAt > Date.now() + 60000) return session;
+      const refreshed = await authRequest('/token?grant_type=refresh_token', { refresh_token: session.refresh_token });
+      setAuthSession(refreshed);
+      return refreshed;
+    }
+
+    async function ensureAuthSession() {
+      const current = readAuthSession();
+      if (!current) return null;
+      try { return await refreshAuthSession(current); } catch (error) {
+        setAuthSession(null);
+        console.warn('Auth refresh failed:', error);
+        return null;
+      }
+    }
+
+    function setSyncStatus(text, state = 'local') {
+      const status = document.getElementById('syncStatusText');
+      const button = document.getElementById('syncNowBtn');
+      if (status) status.textContent = text;
+      if (button) button.classList.toggle('hidden', !backendEnabled());
+      const pill = document.getElementById('syncStatusPill');
+      if (pill) pill.dataset.state = state;
+    }
+
+    function persistedDataSnapshot() {
+      const persisted = JSON.parse(JSON.stringify(appData));
+      delete persisted.refDate;
+      return persisted;
+    }
+
+    async function syncFromBackend() {
+       const refreshedSession = await ensureAuthSession();
+       if (refreshedSession?.access_token) backendConfig.token = refreshedSession.access_token;
+      if (!backendEnabled()) return false;
+      setSyncStatus('同步中…', 'syncing');
+      try {
+        const response = await fetch(`${backendConfig.apiBase || '/api'}/data`, {
+          headers: { authorization: `Bearer ${backendConfig.token}` }
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || payload.error || `同步失敗 (${response.status})`);
+        if (!payload.data || !Array.isArray(payload.data.optBone) || !Array.isArray(payload.data.music40)) throw new Error('後端資料格式不符');
+        appData = payload.data;
+        remoteRevision = Number(payload.revision || 0);
+        appData.refDate = getTodayISO();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(persistedDataSnapshot()));
+        setSyncStatus(`已同步 rev.${remoteRevision}`, 'remote');
+        return true;
+      } catch (error) {
+        setSyncStatus('同步失敗，保留本機資料', 'error');
+        console.error('Backend sync failed:', error);
+        return false;
+      }
+    }
+
+    async function syncToBackend() {
+       const refreshedSession = await ensureAuthSession();
+       if (refreshedSession?.access_token) backendConfig.token = refreshedSession.access_token;
+      if (!backendEnabled()) return;
+      const requestId = crypto.randomUUID ? crypto.randomUUID() : `req-${Date.now()}`;
+      setSyncStatus('儲存同步中…', 'syncing');
+      try {
+        const response = await fetch(`${backendConfig.apiBase || '/api'}/data`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', authorization: `Bearer ${backendConfig.token}` },
+          body: JSON.stringify({ requestId, baseRevision: remoteRevision, data: persistedDataSnapshot() })
+        });
+        const payload = await response.json();
+        if (response.status === 409) {
+          setSyncStatus('版本衝突，請重新同步', 'conflict');
+          alert('共用資料已由其他使用者更新。\n目前修改尚未覆蓋遠端資料，請先按「同步資料」後重新確認。');
+          return;
+        }
+        if (!response.ok) throw new Error(payload.message || payload.error || `儲存失敗 (${response.status})`);
+        remoteRevision = Number(payload.revision || remoteRevision);
+        setSyncStatus(`已同步 rev.${remoteRevision}`, 'remote');
+      } catch (error) {
+        setSyncStatus('同步失敗，資料留在本機', 'error');
+        console.error('Backend save failed:', error);
+      }
+    }
+
+    function queueRemoteSave() {
+      if (!backendEnabled()) return;
+      clearTimeout(remoteSaveTimer);
+      remoteSaveTimer = setTimeout(() => { syncToBackend(); }, 350);
+    }
+
+    function refreshDateRolloverNotice() {
+      const notice = document.getElementById('dateRolloverNotice');
+      if (notice) notice.classList.toggle('hidden', getTodayISO() === openedDate);
+    }
 
     function loadData() {
       try {
@@ -2002,11 +2183,11 @@
             // Ensure members list is initialized
             if (!parsed.members || !Array.isArray(parsed.members) || parsed.members.length === 0) {
               parsed.members = [
-                { id: 'HJ', name: 'HJ (同學)', role: '研究員 / 碩班生' },
-                { id: 'CI', name: 'CI (同學)', role: '研究員 / 碩班生' },
-                { id: '昊', name: '昊 (同學)', role: '研究員 / 碩班生' },
-                { id: '潔', name: '潔 (同學)', role: '問卷追蹤 / 碩班生' },
-                { id: '紳', name: '紳 (同學)', role: '研究員 / 碩班生' }
+                { id: 'DEMO-A', name: 'DEMO-A (同學)', role: 'Demo member' },
+                { id: 'DEMO-B', name: 'DEMO-B (同學)', role: 'Demo member' },
+                { id: 'DEMO-C', name: 'DEMO-C (同學)', role: 'Demo member' },
+                { id: 'DEMO-D', name: 'DEMO-D (同學)', role: 'Demo member' },
+                { id: 'DEMO-E', name: 'DEMO-E (同學)', role: 'Demo member' }
               ];
             }
             if (!parsed.customStudies) parsed.customStudies = [];
@@ -2021,10 +2202,84 @@
 
     function saveData() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        // refDate is a temporary view setting, not part of the persisted research dataset.
+        const persisted = persistedDataSnapshot();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
+        queueRemoteSave();
       } catch (e) {
         console.warn('Failed to save data:', e);
       }
+    }
+
+    function downloadJsonBackup(label, data) {
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const payload = JSON.parse(JSON.stringify(data));
+      payload.schemaVersion = payload.schemaVersion || 1;
+      payload.exportedAt = new Date().toISOString();
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `zheng-lab-${label}-${stamp}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function validateImportedData(data) {
+      const errors = [];
+      if (!data || typeof data !== 'object') {
+        errors.push('資料不是 JSON 物件');
+        return errors;
+      }
+      if (!Array.isArray(data.optBone)) errors.push('缺少 optBone 陣列');
+      if (!Array.isArray(data.music40)) errors.push('缺少 music40 陣列');
+      if (data.customStudies !== undefined && !Array.isArray(data.customStudies)) errors.push('customStudies 必須是陣列');
+      if (data.members !== undefined && !Array.isArray(data.members)) errors.push('members 必須是陣列');
+      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+      const checkRows = (rows, label) => {
+        if (!Array.isArray(rows)) return;
+        rows.forEach((row, index) => {
+          if (!row || typeof row !== 'object') errors.push(`${label} 第 ${index + 1} 筆不是物件`);
+          if (row && !String(row.id || '').trim()) errors.push(`${label} 第 ${index + 1} 筆缺少個案編號`);
+          Object.keys(row || {}).filter(k => /Date$/.test(k) && row[k]).forEach(k => {
+            if (!datePattern.test(row[k])) errors.push(`${label} 第 ${index + 1} 筆 ${k} 日期格式錯誤`);
+          });
+        });
+      };
+      checkRows(data.optBone, 'OPT_Bone');
+      checkRows(data.music40, 'music40');
+      if (Array.isArray(data.customStudies)) {
+        data.customStudies.forEach((study, index) => {
+          if (!study || typeof study !== 'object') {
+            errors.push(`自訂研究案第 ${index + 1} 筆不是物件`);
+            return;
+          }
+          if (!study.code || !String(study.code).trim()) errors.push(`自訂研究案第 ${index + 1} 筆缺少研究案代碼`);
+          if (!Array.isArray(study.subjects)) errors.push(`自訂研究案「${study.code || index + 1}」缺少 subjects 陣列`);
+          if (!Array.isArray(study.milestones)) errors.push(`自訂研究案「${study.code || index + 1}」缺少 milestones 陣列`);
+        });
+      }
+      return errors;
+    }
+
+    function summarizeImportedData(data, fileName) {
+      const custom = data.customStudies || [];
+      let customSubjects = 0, milestoneTotal = 0, doneTotal = 0;
+      custom.forEach(st => {
+        customSubjects += (st.subjects || []).length;
+        milestoneTotal += (st.milestones || []).length;
+        (st.subjects || []).forEach(sub => Object.values(sub.items || {}).forEach(item => { if (item.done) doneTotal++; }));
+      });
+      const countDone = rows => (rows || []).reduce((n, row) => n + Object.keys(row).filter(k => /Done$/.test(k) && row[k]).length, 0);
+      doneTotal += countDone(data.optBone) + countDone(data.music40);
+      return [
+        `來源檔案：${fileName || '未命名'}`,
+        `schemaVersion：${data.schemaVersion || '舊版／未標記'}`,
+        `檔案 revision：${data.revision ?? '未標記'}`,
+        `OPT_Bone 個案：${data.optBone.length}；music40 個案：${data.music40.length}`,
+        `自訂研究案：${custom.length}；自訂案個案：${customSubjects}；追蹤節點：${milestoneTotal}`,
+        `已完成項目：約 ${doneTotal} 筆`
+      ].join('\\n');
     }
 
     /**
@@ -2117,7 +2372,7 @@
         } else if (d <= 14) {
           return {
             code: 'AMBER',
-            label: `前2週黃燈 (${d}天)`,
+            label: `前2週DEMO-102燈 (${d}天)`,
             badgeClass: 'badge-amber',
             cellClass: 'state-amber',
             daysDiff: d
@@ -2152,7 +2407,7 @@
         } else if (d <= 21) {
           return {
             code: 'AMBER',
-            label: `2~3週黃燈 (${d}天)`,
+            label: `2~3週DEMO-102燈 (${d}天)`,
             badgeClass: 'badge-amber',
             cellClass: 'state-amber',
             daysDiff: d
@@ -2171,7 +2426,7 @@
 
     // Collect all milestone tasks across all studies for unified filtering, KPIs, Action Board, and Calendar
     function collectAllTasks() {
-      const refDate = appData.refDate || '2026-10-24';
+      const refDate = appData.refDate || getTodayISO();
       const tasks = [];
 
       // 1. OPT_Bone
@@ -2179,11 +2434,11 @@
         const defaultOwner = row.t1Owner || row.t2Owner || '未指定';
         const defs = [
           { key: 't1', label: 'T1 收案評估', dateField: 't1Date', ownerField: 't1Owner', doneField: 't1Done', rule: 'OPT_T', desc: 'T1~T4 前2天紅燈閃燈提示' },
-          { key: 'p1End', label: '第一階段介入結束 (聯絡安排評估)', dateField: 'p1End', ownerField: 'p1EndOwner', doneField: 'p1EndDone', rule: 'OPT_END', desc: '階段結束前3週綠、前2週黃、前1週紅' },
+          { key: 'p1End', label: '第一階段介入結束 (聯絡安排評估)', dateField: 'p1End', ownerField: 'p1EndOwner', doneField: 'p1EndDone', rule: 'OPT_END', desc: '階段結束前3週綠、前2週DEMO-102、前1週紅' },
           { key: 't2', label: 'T2 收案評估', dateField: 't2Date', ownerField: 't2Owner', doneField: 't2Done', rule: 'OPT_T', desc: 'T1~T4 前2天紅燈閃燈提示' },
-          { key: 'washEnd', label: 'washout 結束 (聯絡安排評估)', dateField: 'washEnd', ownerField: 'washEndOwner', doneField: 'washEndDone', rule: 'OPT_END', desc: '階段結束前3週綠、前2週黃、前1週紅' },
+          { key: 'washEnd', label: 'washout 結束 (聯絡安排評估)', dateField: 'washEnd', ownerField: 'washEndOwner', doneField: 'washEndDone', rule: 'OPT_END', desc: '階段結束前3週綠、前2週DEMO-102、前1週紅' },
           { key: 't3', label: 'T3 收案評估', dateField: 't3Date', ownerField: 't3Owner', doneField: 't3Done', rule: 'OPT_T', desc: 'T1~T4 前2天紅燈閃燈提示' },
-          { key: 'p2End', label: '第二階段介入結束 (聯絡安排評估)', dateField: 'p2End', ownerField: 'p2EndOwner', doneField: 'p2EndDone', rule: 'OPT_END', desc: '階段結束前3週綠、前2週黃、前1週紅' },
+          { key: 'p2End', label: '第二階段介入結束 (聯絡安排評估)', dateField: 'p2End', ownerField: 'p2EndOwner', doneField: 'p2EndDone', rule: 'OPT_END', desc: '階段結束前3週綠、前2週DEMO-102、前1週紅' },
           { key: 't4', label: 'T4 收案評估', dateField: 't4Date', ownerField: 't4Owner', doneField: 't4Done', rule: 'OPT_T', desc: 'T1~T4 前2天紅燈閃燈提示' }
         ];
         defs.forEach(def => {
@@ -2217,19 +2472,20 @@
       appData.music40.forEach((row, idx) => {
         const primaryOwner = row.eval1Owner || row.eval2Owner || row.eval3Owner || '未指定';
         const defs = [
-          { key: 'eval1', label: '初次評估', dateField: 'eval1Date', ownerField: 'eval1Owner', doneField: 'eval1Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週黃、3週以上綠)' },
-          { key: 'quiz1', label: '初次問卷', dateField: 'quiz1Date', ownerField: 'quiz1Owner', doneField: 'quiz1Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週黃、3週以上綠)' },
-          { key: 'end', label: '預計結束日期 (約3個月)', dateField: 'endDate', ownerField: 'endOwner', doneField: 'endDone', desc: 'music40 階段結束提醒 (1週紅、2~3週黃、3週以上綠)' },
-          { key: 'eval2', label: '第二次評估', dateField: 'eval2Date', ownerField: 'eval2Owner', doneField: 'eval2Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週黃、3週以上綠)' },
-          { key: 'quiz2', label: '第二次問卷', dateField: 'quiz2Date', ownerField: 'quiz2Owner', doneField: 'quiz2Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週黃、3週以上綠)' },
-          { key: 'follow', label: '預計追蹤日期 (約6個月)', dateField: 'followDate', ownerField: 'followOwner', doneField: 'followDone', desc: 'music40 追蹤提醒 (1週紅、2~3週黃、3週以上綠)' },
-          { key: 'eval3', label: '第三次評估', dateField: 'eval3Date', ownerField: 'eval3Owner', doneField: 'eval3Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週黃、3週以上綠)' },
-          { key: 'quiz3', label: '第三次問卷', dateField: 'quiz3Date', ownerField: 'quiz3Owner', doneField: 'quiz3Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週黃、3週以上綠)' }
+          { key: 'eval1', label: '初次評估', dateField: 'eval1Date', ownerField: 'eval1Owner', doneField: 'eval1Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週DEMO-102、3週以上綠)' },
+          { key: 'quiz1', label: '初次問卷', dateField: 'quiz1Date', ownerField: 'quiz1Owner', doneField: 'quiz1Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週DEMO-102、3週以上綠)' },
+          { key: 'end', label: '預計結束日期 (約3個月)', dateField: 'endDate', ownerField: 'endOwner', doneField: 'endDone', desc: 'music40 階段結束提醒 (1週紅、2~3週DEMO-102、3週以上綠)' },
+          { key: 'eval2', label: '第二次評估', dateField: 'eval2Date', ownerField: 'eval2Owner', doneField: 'eval2Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週DEMO-102、3週以上綠)' },
+          { key: 'quiz2', label: '第二次問卷', dateField: 'quiz2Date', ownerField: 'quiz2Owner', doneField: 'quiz2Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週DEMO-102、3週以上綠)' },
+          { key: 'follow', label: '預計追蹤日期 (約6個月)', dateField: 'followDate', ownerField: 'followOwner', doneField: 'followDone', desc: 'music40 追蹤提醒 (1週紅、2~3週DEMO-102、3週以上綠)' },
+          { key: 'eval3', label: '第三次評估', dateField: 'eval3Date', ownerField: 'eval3Owner', doneField: 'eval3Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週DEMO-102、3週以上綠)' },
+          { key: 'quiz3', label: '第三次問卷', dateField: 'quiz3Date', ownerField: 'quiz3Owner', doneField: 'quiz3Done', desc: 'music40 評估/問卷提醒 (1週紅、2~3週DEMO-102、3週以上綠)' }
         ];
         defs.forEach(def => {
           const dateVal = row[def.dateField];
           if (!dateVal) return;
-          const ownerVal = row[def.ownerField] || primaryOwner;
+          const isQuestionnaire = def.key.startsWith('quiz');
+          const ownerVal = row[def.ownerField] || (isQuestionnaire ? '未指定' : primaryOwner);
           const doneVal = !!row[def.doneField];
           const st = evaluateMilestone(dateVal, doneVal, 'MUSIC40', refDate);
           tasks.push({
@@ -2276,7 +2532,7 @@
               owner: ownerVal,
               done: doneVal,
               ruleType: ruleType,
-              ruleDesc: ruleType === 'OPT_T' ? '重大急件節點 (≤2天急件閃爍)' : '自訂期程研究案 (1週紅、2~3週黃、3週以上綠)',
+              ruleDesc: ruleType === 'OPT_T' ? '重大急件節點 (≤2天急件閃爍)' : '自訂期程研究案 (1週紅、2~3週DEMO-102、3週以上綠)',
               status: st
             });
           });
@@ -2305,6 +2561,23 @@
       if (statusFilter === 'GREEN') return task.status.code === 'GREEN';
       if (statusFilter === 'DONE') return task.status.code === 'DONE';
       return true;
+    }
+
+    function matchSubjectRow(rowTasks, subject, studentFilter, statusFilter, keyword) {
+      const subjectText = `${subject.id || ''} ${subject.name || ''}`.toLowerCase();
+      if (keyword && !subjectText.includes(keyword.toLowerCase()) && !rowTasks.some(t => matchTaskFilter(t, studentFilter, 'ALL', statusFilter, keyword))) return false;
+      if (studentFilter !== 'ALL' || statusFilter !== 'ALL') {
+        return rowTasks.some(t => matchTaskFilter(t, studentFilter, 'ALL', statusFilter, ''));
+      }
+      return true;
+    }
+
+    function getRowTasks(allTasks, studyCode, rowIndex) {
+      return allTasks.filter(t => t.study === studyCode && t.rowIndex === rowIndex);
+    }
+
+    function matchingTaskCount(rowTasks, studentFilter, statusFilter, keyword) {
+      return rowTasks.filter(t => matchTaskFilter(t, studentFilter, 'ALL', statusFilter, keyword)).length;
     }
 
     function populateFilterOptions(allTasks) {
@@ -2341,12 +2614,38 @@
     // Render Student Pill
     function renderStudentPill(owner) {
       if (!owner) return '<span class="muted">未填</span>';
-      return `<span class="student-pill s-${owner}">${owner}</span>`;
+      const safeOwner = escapeHtml(owner);
+      return `<span class="student-pill s-${safeOwner}">${safeOwner}</span>`;
+    }
+
+    function updateManagementStudyVisibility(studyFilter) {
+      const sections = [
+        ['tab-opt-bone', 'OPT_Bone'],
+        ['tab-music40', 'music40'],
+        ['tab-custom', 'CUSTOM']
+      ];
+      const managementActive = document.querySelector('.tab-btn.active')?.dataset.tab === 'tab-management';
+      sections.forEach(([id, code]) => {
+        const section = document.getElementById(id);
+        if (!section) return;
+        const matchesStudy = studyFilter === 'ALL' || (code === 'CUSTOM' ? (appData.customStudies || []).some(s => s.code === studyFilter) : code === studyFilter);
+        section.classList.toggle('hidden', !(managementActive && matchesStudy));
+      });
+    }
+
+    function showMainView(tabId) {
+      const mainSections = ['tab-action', 'tab-calendar', 'tab-opt-bone', 'tab-music40', 'tab-custom'];
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+      mainSections.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) section.classList.toggle('hidden', tabId !== 'tab-management' && id !== tabId);
+      });
+      if (tabId === 'tab-management') updateManagementStudyVisibility(document.getElementById('studyFilter').value || 'ALL');
     }
 
     // Render Everything
     function renderAll() {
-      document.getElementById('refDateInput').value = appData.refDate || '2026-10-24';
+      document.getElementById('refDateInput').value = appData.refDate || getTodayISO();
       const allTasks = collectAllTasks();
       populateFilterOptions(allTasks);
 
@@ -2376,16 +2675,15 @@
       const filteredTasks = allTasks.filter(t => matchTaskFilter(t, studentFilter, studyFilter, statusFilter, keyword));
 
       document.getElementById('tabCountAction').textContent = filteredTasks.length;
-      document.getElementById('tabCountOpt').textContent = appData.optBone.length;
-      document.getElementById('tabCountMusic').textContent = appData.music40.length;
-      document.getElementById('tabCountCustom').textContent = (appData.customStudies || []).reduce((acc, s) => acc + (s.subjects ? s.subjects.length : 0), 0);
+      document.getElementById('tabCountManagement').textContent = appData.optBone.length + appData.music40.length + (appData.customStudies || []).reduce((acc, s) => acc + (s.subjects ? s.subjects.length : 0), 0);
 
       renderStudentWorkload(allTasks, studentFilter);
       renderActionTable(filteredTasks);
-      renderCalendar(allTasks, studentFilter, studyFilter, keyword);
-      renderOptBoneTable(studentFilter, keyword);
-      renderMusic40Table(studentFilter, keyword);
-      renderCustomStudies(studentFilter, keyword);
+      renderCalendar(allTasks, studentFilter, studyFilter, statusFilter, keyword);
+      renderOptBoneTable(allTasks, studentFilter, studyFilter, statusFilter, keyword);
+      renderMusic40Table(allTasks, studentFilter, studyFilter, statusFilter, keyword);
+      renderCustomStudies(allTasks, studentFilter, studyFilter, statusFilter, keyword);
+      updateManagementStudyVisibility(studyFilter);
     }
 
     function escapeHtml(str) {
@@ -2400,11 +2698,11 @@
 
     function getStudentColor(owner) {
       const map = {
-        'HJ': { bg: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', text: '#ffffff' },
-        'CI': { bg: 'linear-gradient(135deg, #8b5cf6, #6d28d9)', text: '#ffffff' },
-        '昊': { bg: 'linear-gradient(135deg, #f59e0b, #d97706)', text: '#ffffff' },
-        '潔': { bg: 'linear-gradient(135deg, #ec4899, #be185d)', text: '#ffffff' },
-        '紳': { bg: 'linear-gradient(135deg, #10b981, #047857)', text: '#ffffff' }
+        'DEMO-A': { bg: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', text: '#ffffff' },
+        'DEMO-B': { bg: 'linear-gradient(135deg, #8b5cf6, #6d28d9)', text: '#ffffff' },
+        'DEMO-C': { bg: 'linear-gradient(135deg, #f59e0b, #d97706)', text: '#ffffff' },
+        'DEMO-D': { bg: 'linear-gradient(135deg, #ec4899, #be185d)', text: '#ffffff' },
+        'DEMO-E': { bg: 'linear-gradient(135deg, #10b981, #047857)', text: '#ffffff' }
       };
       if (map[owner]) return map[owner];
       let hash = 0;
@@ -2477,7 +2775,7 @@
             <div class="student-stats">
               <span class="badge badge-overdue" title="逾期未完成">⚠️ 逾期 ${overdue}</span>
               <span class="badge badge-red" title="紅燈急件 (≤7天或T點前2天)">🔴 急件 ${red}</span>
-              <span class="badge badge-amber" title="黃燈預警 (2~3週內)">🟡 預警 ${amber}</span>
+              <span class="badge badge-amber" title="DEMO-102燈預警 (2~3週內)">🟡 預警 ${amber}</span>
               <span class="badge badge-green" title="綠燈提醒 (3週前)">🟢 提醒 ${green}</span>
               <span class="badge badge-done" title="已完成">✅ 完成 ${done}</span>
             </div>
@@ -2546,7 +2844,7 @@
     }
 
     // Render Interactive Calendar
-    function renderCalendar(allTasks, studentFilter, studyFilter, keyword) {
+    function renderCalendar(allTasks, studentFilter, studyFilter, statusFilter, keyword) {
       const titleEl = document.getElementById('calMonthTitle');
       titleEl.textContent = `${calYear} 年 ${calMonth} 月`;
 
@@ -2558,7 +2856,10 @@
       const startDow = firstDay.getDay();
       const daysInMonth = new Date(calYear, calMonth, 0).getDate();
 
-      const calTasks = allTasks.filter(t => matchTaskFilter(t, studentFilter, studyFilter, 'ALL', keyword));
+      const calTasks = allTasks.filter(t => matchTaskFilter(t, studentFilter, studyFilter, statusFilter, keyword));
+      if (calTasks.length === 0) {
+        html += `<div class="empty-state" style="grid-column:1 / -1;"><strong>目前月份沒有符合條件的日期事件。</strong><div class="empty-state-filter">${escapeHtml(getFilterSummary())}</div><button type="button" class="btn btn-secondary btn-xs" onclick="document.getElementById('clearFiltersBtn').click()">清除篩選</button></div>`;
+      }
       const tasksByDate = {};
       calTasks.forEach(t => {
         if (!tasksByDate[t.date]) tasksByDate[t.date] = [];
@@ -2643,25 +2944,24 @@
     }
 
     // Render OPT_Bone Table
-    function renderOptBoneTable(studentFilter, keyword) {
+    function renderOptBoneTable(allTasks, studentFilter, studyFilter, statusFilter, keyword) {
       const tbody = document.getElementById('optBoneTableBody');
-      const rows = appData.optBone.map((r, i) => ({ r, i })).filter(({ r }) => {
-        if (studentFilter !== 'ALL') {
-          const owners = [r.t1Owner, r.p1EndOwner, r.t2Owner, r.washEndOwner, r.t3Owner, r.p2EndOwner, r.t4Owner];
-          if (!owners.includes(studentFilter)) return false;
-        }
-        if (keyword) {
-          const kw = keyword.toLowerCase();
-          if (!`${r.id} ${r.name}`.toLowerCase().includes(kw)) return false;
-        }
-        return true;
+      const rows = appData.optBone.map((r, i) => ({ r, i, rowTasks: getRowTasks(allTasks, 'OPT_Bone', i) })).filter(({ r, rowTasks }) => {
+        if (studyFilter !== 'ALL' && studyFilter !== 'OPT_Bone') return false;
+        return matchSubjectRow(rowTasks, r, studentFilter, statusFilter, keyword);
       });
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="13"><div class="empty-state"><strong>目前篩選條件下沒有 OPT_Bone 個案。</strong><div class="empty-state-filter">${escapeHtml(getFilterSummary())}</div><button type="button" class="btn btn-secondary btn-xs" onclick="document.getElementById('clearFiltersBtn').click()">清除篩選</button></div></td></tr>`;
+        return;
+      }
 
-      tbody.innerHTML = rows.map(({ r, i }) => {
+      tbody.innerHTML = rows.map(({ r, i, rowTasks }) => {
+        const matchedCount = matchingTaskCount(rowTasks, studentFilter, statusFilter, keyword);
         return `
           <tr>
             <td class="sticky-col">
-              <div style="font-weight:800; color:var(--navy);">${r.id}</div>
+              <div style="font-weight:800; color:var(--navy);">${escapeHtml(r.id)}</div>
+              ${studentFilter !== 'ALL' || statusFilter !== 'ALL' || keyword ? `<div class="muted" style="font-size:10px;">符合節點 ${matchedCount} 筆</div>` : ''}
               <input type="text" value="${r.name || ''}" placeholder="姓名縮寫"
                 style="width:75px; font-size:11px; padding:2px 4px; border:1px solid #cbd5e1; border-radius:4px; margin-top:3px;"
                 onchange="updateTableField('optBone', ${i}, 'name', this.value)">
@@ -2756,25 +3056,24 @@
     }
 
     // Render music40 Table
-    function renderMusic40Table(studentFilter, keyword) {
+    function renderMusic40Table(allTasks, studentFilter, studyFilter, statusFilter, keyword) {
       const tbody = document.getElementById('music40TableBody');
-      const rows = appData.music40.map((r, i) => ({ r, i })).filter(({ r }) => {
-        if (studentFilter !== 'ALL') {
-          const owners = [r.endOwner, r.followOwner, r.eval1Owner, r.quiz1Owner, r.eval2Owner, r.quiz2Owner, r.eval3Owner, r.quiz3Owner];
-          if (!owners.includes(studentFilter)) return false;
-        }
-        if (keyword) {
-          const kw = keyword.toLowerCase();
-          if (!`${r.id} ${r.name}`.toLowerCase().includes(kw)) return false;
-        }
-        return true;
+      const rows = appData.music40.map((r, i) => ({ r, i, rowTasks: getRowTasks(allTasks, 'music40', i) })).filter(({ r, rowTasks }) => {
+        if (studyFilter !== 'ALL' && studyFilter !== 'music40') return false;
+        return matchSubjectRow(rowTasks, r, studentFilter, statusFilter, keyword);
       });
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><strong>目前篩選條件下沒有 music40 個案。</strong><div class="empty-state-filter">${escapeHtml(getFilterSummary())}</div><button type="button" class="btn btn-secondary btn-xs" onclick="document.getElementById('clearFiltersBtn').click()">清除篩選</button></div></td></tr>`;
+        return;
+      }
 
-      tbody.innerHTML = rows.map(({ r, i }) => {
+      tbody.innerHTML = rows.map(({ r, i, rowTasks }) => {
+        const matchedCount = matchingTaskCount(rowTasks, studentFilter, statusFilter, keyword);
         return `
           <tr>
             <td class="sticky-col">
-              <div style="font-weight:800; color:var(--navy);">${r.id}</div>
+              <div style="font-weight:800; color:var(--navy);">${escapeHtml(r.id)}</div>
+              ${studentFilter !== 'ALL' || statusFilter !== 'ALL' || keyword ? `<div class="muted" style="font-size:10px;">符合節點 ${matchedCount} 筆</div>` : ''}
               <input type="text" value="${r.name || ''}" placeholder="姓氏"
                 style="width:65px; font-size:11px; padding:2px 4px; border:1px solid #cbd5e1; border-radius:4px; margin-top:3px;"
                 onchange="updateTableField('music40', ${i}, 'name', this.value)">
@@ -2862,28 +3161,24 @@
     }
 
     // Render Custom Multi-Period Studies (1M / 3M / 6M etc.)
-    function renderCustomStudies(studentFilter, keyword) {
+    function renderCustomStudies(allTasks, studentFilter, studyFilter, statusFilter, keyword) {
       const container = document.getElementById('customStudiesContainer');
-      const studies = appData.customStudies || [];
+      const studies = (appData.customStudies || []).map((stObj, originalIdx) => ({ stObj, originalIdx }))
+        .filter(({ stObj }) => studyFilter === 'ALL' || stObj.code === studyFilter);
       if (studies.length === 0) {
-        container.innerHTML = `<div style="padding:20px; text-align:center; color:var(--muted);">目前尚無自訂研究案，請點擊右上角「＋ 新增研究案」建立（例如 1個月／3個月／6個月收案追蹤）。</div>`;
+        renderNoResults(container, appData.customStudies?.length ? '目前篩選條件下沒有符合的自訂研究案。' : '目前尚無自訂研究案，請先建立研究案。');
         return;
       }
 
-      container.innerHTML = studies.map((stObj, sIdx) => {
+      container.innerHTML = studies.map(({ stObj, originalIdx: sIdx }) => {
         const milestones = stObj.milestones || [];
 
-        // Filter subjects
-        const subjects = (stObj.subjects || []).map((sub, subIdx) => ({ sub, subIdx })).filter(({ sub }) => {
-          if (studentFilter !== 'ALL') {
-            const owners = Object.values(sub.items || {}).map(it => it.owner || stObj.defaultOwner);
-            if (!owners.includes(studentFilter)) return false;
-          }
-          if (keyword) {
-            const kw = keyword.toLowerCase();
-            if (!`${sub.id} ${sub.name || ''}`.toLowerCase().includes(kw)) return false;
-          }
-          return true;
+        // A subject row is visible when at least one of its milestone tasks matches the filters.
+        const subjects = (stObj.subjects || []).map((sub, subIdx) => ({
+          sub, subIdx,
+          rowTasks: allTasks.filter(t => t.study === stObj.code && t.rowIndex === subIdx)
+        })).filter(({ sub, rowTasks }) => {
+          return matchSubjectRow(rowTasks, sub, studentFilter, statusFilter, keyword);
         });
 
         return `
@@ -2927,12 +3222,13 @@
                 </thead>
                 <tbody>
                   ${subjects.length === 0 ? `
-                    <tr><td colspan="${milestones.length + 3}" style="text-align:center; padding:18px; color:var(--muted);">此研究案目前無符合篩選條件的受試者。</td></tr>
-                  ` : subjects.map(({ sub, subIdx }) => `
+                    <tr><td colspan="${milestones.length + 3}"><div class="empty-state"><strong>此研究案目前無符合篩選條件的受試者。</strong><div class="empty-state-filter">${escapeHtml(getFilterSummary())}</div><button type="button" class="btn btn-secondary btn-xs" onclick="document.getElementById('clearFiltersBtn').click()">清除篩選</button></div></td></tr>
+                  ` : subjects.map(({ sub, subIdx, rowTasks }) => `
                     <tr>
                       <td class="sticky-col">
-                        <strong>${sub.id}</strong>
-                        <div class="muted" style="font-size:11px;">${sub.name || ''}</div>
+                        <strong>${escapeHtml(sub.id)}</strong>
+                        ${studentFilter !== 'ALL' || statusFilter !== 'ALL' || keyword ? `<div class="muted" style="font-size:10px;">符合節點 ${matchingTaskCount(rowTasks, studentFilter, statusFilter, keyword)} 筆</div>` : ''}
+                        <div class="muted" style="font-size:11px;">${escapeHtml(sub.name || '')}</div>
                       </td>
                       <td>
                         <div style="display:flex; align-items:center; gap:4px;">
@@ -3107,18 +3403,12 @@
       if (defaultStudy) select.value = defaultStudy;
       document.getElementById('newSubId').value = '';
       document.getElementById('newSubName').value = '';
-      document.getElementById('newSubStartDate').value = appData.refDate || '2026-10-24';
+      document.getElementById('newSubStartDate').value = appData.refDate || getTodayISO();
 
       const curStudy = select.value;
-      let defOwner = 'HJ';
-      if (curStudy === 'OPT_Bone') defOwner = 'HJ';
-      else if (curStudy === 'music40') defOwner = '紳';
-      else {
-        const st = (appData.customStudies || []).find(s => s.code === curStudy);
-        if (st && st.defaultOwner) defOwner = st.defaultOwner;
-      }
-      document.getElementById('newSubPrimaryOwner').value = defOwner;
-      document.getElementById('newSubSecondOwner').value = '潔';
+      // Assignment is intentionally blank on every new subject; the user must choose the primary owner.
+      document.getElementById('newSubPrimaryOwner').value = '';
+      document.getElementById('newSubSecondOwner').value = '';
       modal.classList.add('open');
     }
 
@@ -3199,7 +3489,7 @@
       document.getElementById('studyCodeInput').value = '';
       document.getElementById('studyDescInput').value = '';
       document.getElementById('studyCodeInput').readOnly = false;
-      populateStudyOwnerSelect('studyDefaultOwnerSelect', (appData.members && appData.members[0] ? appData.members[0].id : 'HJ'));
+      populateStudyOwnerSelect('studyDefaultOwnerSelect', (appData.members && appData.members[0] ? appData.members[0].id : 'DEMO-A'));
       applyMilestonePreset('1M_3M_6M');
       document.getElementById('studyConfigModal').classList.add('open');
     }
@@ -3326,7 +3616,7 @@
             </td>
             <td>
               <select style="width:100%; font-size:11px;" onchange="editingMilestones[${idx}].rule = this.value">
-                <option value="MUSIC40" ${m.rule !== 'OPT_T' ? 'selected' : ''}>一般提醒 (1週紅/2-3週黃)</option>
+                <option value="MUSIC40" ${m.rule !== 'OPT_T' ? 'selected' : ''}>一般提醒 (1週紅/2-3週DEMO-102)</option>
                 <option value="OPT_T" ${m.rule === 'OPT_T' ? 'selected' : ''}>⚡ 重大急件 (≤2天急件閃紅燈)</option>
               </select>
             </td>
@@ -3346,7 +3636,47 @@
     }
 
     // Event Listeners
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!authConfig.supabaseUrl) {
+         try {
+           const configResponse = await fetch('/api/config');
+           if (configResponse.ok) Object.assign(authConfig, await configResponse.json());
+         } catch (error) { console.warn('Auth config unavailable:', error); }
+       }
+       const savedSession = await ensureAuthSession();
+       if (savedSession) setAuthSession(savedSession);
+       const authButton = document.getElementById('authButton');
+       if (authButton) authButton.addEventListener('click', () => {
+         if (readAuthSession()) {
+           setAuthSession(null);
+           setSyncStatus('本機模式', 'local');
+           renderAll();
+         } else {
+           document.getElementById('authModal')?.classList.add('open');
+         }
+       });
+       document.getElementById('authForm')?.addEventListener('submit', async (event) => {
+         event.preventDefault();
+         const message = document.getElementById('authMessage');
+         if (message) message.textContent = '登入中…';
+         try {
+           const session = await authRequest('/token?grant_type=password', {
+             email: document.getElementById('authEmail').value.trim(),
+             password: document.getElementById('authPassword').value
+           });
+           setAuthSession(session);
+           closeModal('authModal');
+           await syncFromBackend();
+           renderAll();
+         } catch (error) {
+           if (message) message.textContent = `登入失敗：${error.message}`;
+         }
+       });
+       setSyncStatus(backendEnabled() ? '準備同步' : '本機模式', backendEnabled() ? 'remote' : 'local');
+      const syncNowButton = document.getElementById('syncNowBtn');
+      if (syncNowButton) syncNowButton.addEventListener('click', () => syncFromBackend().then(() => renderAll()));
+      if (backendEnabled()) await syncFromBackend();
+
       // Close modal on Escape key or clicking backdrop outside
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -3363,12 +3693,7 @@
 
       // Tab switching
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-          document.querySelectorAll('.tab-section').forEach(s => s.classList.add('hidden'));
-          btn.classList.add('active');
-          document.getElementById(btn.dataset.tab).classList.remove('hidden');
-        });
+        btn.addEventListener('click', () => showMainView(btn.dataset.tab));
       });
 
       // KPI Card filter clicks
@@ -3391,13 +3716,31 @@
       document.getElementById('refDateInput').addEventListener('change', (e) => {
         if (e.target.value) {
           appData.refDate = e.target.value;
-          saveData();
           renderAll();
         }
       });
       document.getElementById('resetTodayBtn').addEventListener('click', () => {
-        appData.refDate = '2026-10-24';
-        saveData();
+        appData.refDate = getTodayISO();
+        openedDate = appData.refDate;
+        refreshDateRolloverNotice();
+        const [y, m] = appData.refDate.split('-').map(Number);
+        calYear = y;
+        calMonth = m;
+        renderAll();
+      });
+
+      document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+        document.getElementById('studentFilter').value = 'ALL';
+        document.getElementById('studyFilter').value = 'ALL';
+        document.getElementById('statusFilter').value = 'ALL';
+        document.getElementById('keywordSearch').value = '';
+        appData.refDate = getTodayISO();
+        openedDate = appData.refDate;
+        refreshDateRolloverNotice();
+        const [y, m] = appData.refDate.split('-').map(Number);
+        calYear = y;
+        calMonth = m;
+        showMainView('tab-action');
         renderAll();
       });
 
@@ -3413,7 +3756,7 @@
         renderAll();
       });
       document.getElementById('calJumpRefBtn').addEventListener('click', () => {
-        const [y, m] = (appData.refDate || '2026-10-24').split('-').map(Number);
+        const [y, m] = (appData.refDate || getTodayISO()).split('-').map(Number);
         calYear = y;
         calMonth = m;
         renderAll();
@@ -3423,32 +3766,6 @@
       document.getElementById('openAddSubjectBtn').addEventListener('click', () => openAddSubjectModal());
       document.getElementById('openAddStudyBtn').addEventListener('click', () => openCreateStudyModal());
       document.getElementById('openManageMembersBtn').addEventListener('click', () => openManageMembersModal());
-
-      // Mark all past dates as Done
-      document.getElementById('markPastDoneBtn').addEventListener('click', () => {
-        const ref = appData.refDate || '2026-10-24';
-        if (!confirm(`是否將所有早於基準日 (${ref}) 的過往階段與評估一鍵標記為「已完成 ✓」？\n（您之後仍可隨時單獨切換任何項目的完成／逾期狀態）`)) return;
-
-        appData.optBone.forEach(r => {
-          [['t1Date','t1Done'],['p1End','p1EndDone'],['t2Date','t2Done'],['washEnd','washEndDone'],['t3Date','t3Done'],['p2End','p2EndDone'],['t4Date','t4Done']].forEach(([df, dnf]) => {
-            if (r[df] && diffDays(r[df], ref) < 0) r[dnf] = true;
-          });
-        });
-        appData.music40.forEach(r => {
-          [['endDate','endDone'],['followDate','followDone'],['eval1Date','eval1Done'],['quiz1Date','quiz1Done'],['eval2Date','eval2Done'],['quiz2Date','quiz2Done'],['eval3Date','eval3Done'],['quiz3Date','quiz3Done']].forEach(([df, dnf]) => {
-            if (r[df] && diffDays(r[df], ref) < 0) r[dnf] = true;
-          });
-        });
-        (appData.customStudies || []).forEach(st => {
-          (st.subjects || []).forEach(sub => {
-            Object.values(sub.items || {}).forEach(it => {
-              if (it.date && diffDays(it.date, ref) < 0) it.done = true;
-            });
-          });
-        });
-        saveData();
-        renderAll();
-      });
 
       // Fill blank music40 questionnaire dates with corresponding evaluation dates
       document.getElementById('fillMusic40QuizDatesBtn').addEventListener('click', () => {
@@ -3467,9 +3784,15 @@
         const study = document.getElementById('newSubStudy').value;
         const id = document.getElementById('newSubId').value.trim();
         const name = document.getElementById('newSubName').value.trim();
-        const owner1 = document.getElementById('newSubPrimaryOwner').value.trim() || 'HJ';
-        const owner2 = document.getElementById('newSubSecondOwner').value.trim() || '潔';
+        const owner1 = document.getElementById('newSubPrimaryOwner').value.trim();
+        const owner2 = document.getElementById('newSubSecondOwner').value.trim();
         const start = document.getElementById('newSubStartDate').value;
+
+        if (!owner1) {
+          alert('請指定主要負責學生後再儲存。');
+          document.getElementById('newSubPrimaryOwner').focus();
+          return;
+        }
 
         if (study === 'OPT_Bone') {
           appData.optBone.push({
@@ -3482,7 +3805,8 @@
             p2Start: '', p2End: '', p2EndOwner: owner1, p2EndDone: false,
             t4Date: '', t4Owner: owner1, t4Done: false
           });
-          document.querySelector('[data-tab="tab-opt-bone"]').click();
+          document.getElementById('studyFilter').value = 'OPT_Bone';
+          showMainView('tab-management');
         } else if (study === 'music40') {
           appData.music40.push({
             id, name, startDate: start || '',
@@ -3495,7 +3819,8 @@
             eval3Date: start ? addDays(start, 180) : '', eval3Owner: owner1, eval3Done: false,
             quiz3Date: '', quiz3Owner: owner2, quiz3Done: false
           });
-          document.querySelector('[data-tab="tab-music40"]').click();
+          document.getElementById('studyFilter').value = 'music40';
+          showMainView('tab-management');
         } else {
           const stObj = (appData.customStudies || []).find(s => s.code === study);
           if (stObj) {
@@ -3508,7 +3833,8 @@
               };
             });
             stObj.subjects.push({ id, name, startDate: start || '', items });
-            document.querySelector('[data-tab="tab-custom"]').click();
+            document.getElementById('studyFilter').value = study;
+            showMainView('tab-management');
           }
         }
         saveData();
@@ -3545,7 +3871,7 @@
         e.preventDefault();
         const code = document.getElementById('studyCodeInput').value.trim();
         const desc = document.getElementById('studyDescInput').value.trim();
-        const defaultOwner = document.getElementById('studyDefaultOwnerSelect').value.trim() || 'HJ';
+        const defaultOwner = document.getElementById('studyDefaultOwnerSelect').value.trim() || 'DEMO-A';
         const editIdx = Number(document.getElementById('editStudyIndex').value);
 
         if (!code) {
@@ -3605,19 +3931,14 @@
 
         saveData();
         closeModal('studyConfigModal');
-        document.querySelector('[data-tab="tab-custom"]').click();
+        document.getElementById('studyFilter').value = code;
+        showMainView('tab-management');
         renderAll();
       });
 
       // Export JSON
       document.getElementById('exportJsonBtn').addEventListener('click', () => {
-        const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `zheng-lab-dashboard-backup-${appData.refDate || '2026-10-24'}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+        downloadJsonBackup('dashboard-backup', appData);
       });
 
       // Import JSON
@@ -3625,33 +3946,55 @@
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = (ev) => {
+        reader.onload = async (ev) => {
           try {
             const parsed = JSON.parse(ev.target.result);
-            if (parsed && parsed.optBone && parsed.music40) {
-              appData = parsed;
-              saveData();
-              renderAll();
-              alert('資料匯入成功！');
-            } else {
-              alert('JSON 檔案格式不符。');
+            const errors = validateImportedData(parsed);
+            if (errors.length > 0) {
+              alert(`JSON 檔案格式不符，未修改目前資料：\\n\\n${errors.slice(0, 12).join('\\n')}${errors.length > 12 ? '\\n…其餘錯誤略' : ''}`);
+              e.target.value = '';
+              return;
             }
+            const summary = summarizeImportedData(parsed, file.name);
+            const shouldImport = confirm(`匯入摘要：\\n\\n${summary}\\n\\n⚠️ 確認後將覆蓋目前瀏覽器中的研究資料。\\n取消不會改變目前資料。\\n\\n確定要繼續匯入嗎？`);
+            if (!shouldImport) {
+              e.target.value = '';
+              return;
+            }
+            // Keep both an automatic download and a local snapshot before replacement.
+            localStorage.setItem('ZHENG_LAB_LAST_IMPORT_SNAPSHOT', JSON.stringify({ createdAt: new Date().toISOString(), data: appData }));
+            downloadJsonBackup('before-import-snapshot', appData);
+            if (backendEnabled()) {
+              const response = await fetch(`${backendConfig.apiBase || '/api'}/import`, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json', authorization: `Bearer ${backendConfig.token}` },
+                body: JSON.stringify({ requestId: crypto.randomUUID ? crypto.randomUUID() : `req-${Date.now()}`, data: parsed })
+              });
+              const payload = await response.json().catch(() => ({}));
+              if (!response.ok) throw new Error(payload.message || payload.error || `後端匯入失敗 (${response.status})`);
+              remoteRevision = Number(payload.revision || remoteRevision);
+            }
+            appData = parsed;
+            if (!Array.isArray(appData.members)) appData.members = [];
+            if (!Array.isArray(appData.customStudies)) appData.customStudies = [];
+            appData.refDate = getTodayISO();
+            const persisted = persistedDataSnapshot();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
+            setSyncStatus(backendEnabled() ? `已同步 rev.${remoteRevision}` : '本機模式', backendEnabled() ? 'remote' : 'local');
+            renderAll();
+            e.target.value = '';
+            alert(`資料匯入成功！\\n\\n${summary}\\n\\n已先建立匯入前安全快照${backendEnabled() ? `，遠端 revision=${remoteRevision}` : ''}。`);
           } catch (err) {
-            alert('讀取 JSON 失敗：' + err.message);
+            alert('讀取 JSON 失敗，未修改目前資料：' + err.message);
+            e.target.value = '';
           }
         };
         reader.readAsText(file);
       });
 
-      // Reset to Default Excel Data
-      document.getElementById('resetDefaultBtn').addEventListener('click', () => {
-        if (!confirm('確定要還原為 Excel 檔案的初始個案資料嗎？這將會覆蓋您目前在瀏覽器中新增或修改的紀錄。')) return;
-        appData = getDefaultData();
-        saveData();
-        renderAll();
-      });
-
       renderAll();
+      refreshDateRolloverNotice();
+      window.setInterval(refreshDateRolloverNotice, 60000);
     });
   </script>
 </body>

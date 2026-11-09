@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "members": [
+    { "id": "DEMO-A", "name": "測試成員 A", "role": "研究人員" },
+    { "id": "DEMO-B", "name": "測試成員 B", "role": "研究人員" }
+  ],
+  "optBone": [
+    {
+      "id": "DEMO-001",
+      "name": "測試個案一",
+      "screenDate": "2026-11-01",
+      "t1Date": "2026-11-10", "t1Owner": "DEMO-A", "t1Done": false,
+      "p1Start": "2026-11-11", "p1End": "2026-12-09", "p1EndOwner": "DEMO-A", "p1EndDone": false,
+      "t2Date": "", "t2Owner": "DEMO-B", "t2Done": false,
+      "washStart": "", "washEnd": "", "washEndOwner": "DEMO-B", "washEndDone": false,
+      "t3Date": "", "t3Owner": "DEMO-A", "t3Done": false,
+      "p2Start": "", "p2End": "", "p2EndOwner": "DEMO-A", "p2EndDone": false,
+      "t4Date": "", "t4Owner": "DEMO-B", "t4Done": false
+    }
+  ],
+  "music40": [
+    {
+      "id": "DEMO-002",
+      "name": "測試個案二",
+      "startDate": "2026-11-03",
+      "endDate": "2027-02-01", "endOwner": "DEMO-A", "endDone": false,
+      "followDate": "2027-05-02", "followOwner": "DEMO-B", "followDone": false,
+      "eval1Date": "2026-11-03", "eval1Owner": "DEMO-A", "eval1Done": true,
+      "quiz1Date": "2026-11-03", "quiz1Owner": "DEMO-B", "quiz1Done": true,
+      "eval2Date": "", "eval2Owner": "DEMO-A", "eval2Done": false,
+      "quiz2Date": "", "quiz2Owner": "DEMO-B", "quiz2Done": false,
+      "eval3Date": "", "eval3Owner": "DEMO-A", "eval3Done": false,
+      "quiz3Date": "", "quiz3Owner": "DEMO-B", "quiz3Done": false
+    }
+  ],
+  "customStudies": [
+    {
+      "code": "DEMO_STUDY",
+      "description": "匿名化多期程測試研究案",
+      "defaultOwner": "DEMO-A",
+      "milestones": [
+        { "key": "baseline", "label": "基線評估", "offsetDays": 0, "rule": "MUSIC40", "owner": "DEMO-A" },
+        { "key": "month1", "label": "一個月追蹤", "offsetDays": 30, "rule": "MUSIC40", "owner": "DEMO-B" }
+      ],
+      "subjects": [
+        {
+          "id": "DEMO-003",
+          "name": "測試個案三",
+          "startDate": "2026-11-05",
+          "items": {
+            "baseline": { "date": "2026-11-05", "owner": "DEMO-A", "done": false },
+            "month1": { "date": "2026-12-05", "owner": "DEMO-B", "done": false }
+          }
+        }
+      ]
+    }
+  ]
+}
