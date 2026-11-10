@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "check": "node scripts/check-project.mjs",
+    "dev": "node scripts/dev-server.mjs",
+    "supabase:reset:all": "node scripts/reset-lab-environment.mjs",
     "check:env": "node scripts/check-env.mjs",
     "supabase:migrate": "node scripts/run-supabase-migration.mjs",
     "supabase:seed:demo": "node scripts/seed-supabase-demo.mjs",

@@ -6,7 +6,9 @@ const files = {
   backup: await readFile('api/backup.js', 'utf8'),
   backups: await readFile('api/backups.js', 'utf8'),
   restore: await readFile('api/restore.js', 'utf8'),
-  importApi: await readFile('api/import.js', 'utf8')
+  importApi: await readFile('api/import.js', 'utf8'),
+  profile: await readFile('api/profile.js', 'utf8'),
+  profiles: await readFile('api/profiles.js', 'utf8')
 };
 const checks = [
   ['migration creates backup health runs', files.migration.includes('create table if not exists public.lab_backup_runs')],
@@ -21,14 +23,17 @@ const checks = [
   ['backup job records checksum', files.backup.includes('create_lab_backup') && files.backup.includes('checksum')],
   ['backup list exposes health runs', files.backups.includes('lab_backup_runs') && files.backups.includes('runs')],
   ['restore maps integrity failure', files.restore.includes('backup_integrity_failed')],
-  ['import passes request id and data', files.importApi.includes('p_data: body.data') && files.importApi.includes('p_request_id: body.requestId')]
+  ['import passes request id and data', files.importApi.includes('p_data: body.data') && files.importApi.includes('p_request_id: body.requestId')],
+  ['profile endpoint reads current user', files.profile.includes('/auth/v1/user') && files.profile.includes('id: `eq.${user.id}`')],
+  ['profiles endpoint supports admin CRUD shape', files.profiles.includes("['GET', 'POST', 'PATCH']") && files.profiles.includes('member_code')],
+  ['profiles migration restricts writes to admins', files.migration.includes('admins can insert profile') && files.migration.includes('admins can update profile')]
 ];
 let failed = 0;
 for (const [name, ok] of checks) {
   console.log(`${ok ? '✓' : '✗'} ${name}`);
   if (!ok) failed++;
 }
-for (const file of ['api/backup.js', 'api/backups.js', 'api/restore.js', 'api/import.js']) {
+for (const file of ['api/backup.js', 'api/backups.js', 'api/restore.js', 'api/import.js', 'api/profile.js', 'api/profiles.js']) {
   const result = spawnSync(process.execPath, ['--check', file], { encoding: 'utf8' });
   if (result.status !== 0) {
     console.error(result.stderr || `${file} syntax check failed`);

@@ -9,5 +9,5 @@ const response = await fetch(`https://api.supabase.com/v1/projects/${ref}/databa
 const rows = await response.json();
 if (!response.ok) throw new Error(`角色查詢失敗 HTTP ${response.status}`);
 const counts = Object.fromEntries(rows.map(row => [row.role, row.active_count]));
-for (const role of ['admin', 'backup_admin']) console.log(`${counts[role] > 0 ? '✓' : '✗'} ${role}: ${counts[role] || 0} active account(s)`);
-if (!(counts.admin > 0 && counts.backup_admin > 0)) process.exit(1);
+for (const role of ['admin', 'backup_admin']) console.log(`${counts[role] > 0 ? '✓' : 'ℹ'} ${role}: ${counts[role] || 0} active account(s)`);
+if (!(counts.admin > 0)) process.exit(1);

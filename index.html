@@ -2106,17 +2106,30 @@ td.sticky-col {
         <div style="background:#f8fafc; border:1px solid var(--line); border-radius:8px; padding:12px 14px;">
           <strong style="font-size:13px; color:var(--navy); display:block; margin-bottom:8px;">＋ 新增實驗室成員／學生</strong>
           <form id="addMemberForm" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+            <div style="flex:1.2; min-width:140px;" class="form-field">
+              <label for="newMemEmail">登入 Email <span class="req">*</span></label>
+              <input type="email" id="newMemEmail" placeholder="student@cgu.edu.tw" required>
+            </div>
             <div style="flex:1; min-width:110px;" class="form-field">
-              <label for="newMemId">代號／縮寫 <span class="req">*</span></label>
-              <input type="text" id="newMemId" placeholder="例如：DEMO-A, 豪, DEMO-B" required>
+              <label for="newMemId">成員代號／縮寫 <span class="req">*</span></label>
+              <input type="text" id="newMemId" placeholder="例如：昊, CI, 潔" required>
             </div>
-            <div style="flex:1.5; min-width:140px;" class="form-field">
-              <label for="newMemName">姓名／稱謂</label>
-              <input type="text" id="newMemName" placeholder="例如：王同學 或 W.J. Wang">
+            <div style="flex:1.2; min-width:130px;" class="form-field">
+              <label for="newMemName">顯示姓名／稱謂</label>
+              <input type="text" id="newMemName" placeholder="例如：王同學">
             </div>
-            <div style="flex:1.5; min-width:140px;" class="form-field">
+            <div style="flex:1; min-width:110px;" class="form-field">
+              <label for="newMemPassword">初始密碼（選填）</label>
+              <input type="text" id="newMemPassword" placeholder="預設: ZhengLab2026!">
+            </div>
+            <div style="flex:1.2; min-width:130px;" class="form-field">
               <label for="newMemRole">角色／負責項目</label>
-              <input type="text" id="newMemRole" placeholder="例如：Demo member">
+              <select id="newMemRole">
+                <option value="researcher">研究人員</option>
+                <option value="study_manager">研究案管理者</option>
+                <option value="admin">管理者</option>
+                <option value="backup_admin">備份管理者</option>
+              </select>
             </div>
             <button type="submit" class="btn btn-primary" style="height:35px; white-space:nowrap;">＋ 加入名冊</button>
           </form>
@@ -2499,6 +2512,24 @@ td.sticky-col {
 
     const AUTH_SESSION_KEY = 'ZHENG_LAB_AUTH_SESSION';
     const authConfig = window.__ZHENG_LAB_AUTH__ || {};
+    let currentProfile = null;
+    let remoteProfiles = [];
+
+    function isAdmin() {
+      return ['admin', 'backup_admin'].includes(currentProfile?.role);
+    }
+
+    function canManageStudies() {
+      return ['admin', 'backup_admin', 'study_manager'].includes(currentProfile?.role);
+    }
+
+    function canAddSubjects() {
+      return !backendEnabled() || ['admin', 'backup_admin', 'study_manager', 'researcher'].includes(currentProfile?.role);
+    }
+
+    function currentMemberCode() {
+      return currentProfile?.member_code || currentProfile?.memberCode || '';
+    }
 
     function backendEnabled() {
       return backendConfig.enabled === true && typeof backendConfig.token === 'string' && backendConfig.token.length > 0;
@@ -2524,8 +2555,10 @@ td.sticky-col {
       const userText = document.getElementById('authUserText');
       const button = document.getElementById('authButton');
       const email = session?.user?.email || session?.email || '';
-      if (userText) userText.textContent = email ? `👤 ${email}` : '';
+      if (userText) userText.textContent = currentProfile ? `👤 ${currentProfile.display_name || email} · ${currentProfile.role}` : (email ? `👤 ${email}` : '');
       if (button) button.textContent = session?.access_token ? '登出' : '登入';
+       const memberButton = document.getElementById('openManageMembersBtn');
+       if (memberButton) memberButton.classList.toggle('hidden', backendEnabled() && !isAdmin());
     }
 
     async function authRequest(path, body) {
@@ -2549,12 +2582,26 @@ td.sticky-col {
 
     async function ensureAuthSession() {
       const current = readAuthSession();
-      if (!current) return null;
+      if (!current) { currentProfile = null; return null; }
       try { return await refreshAuthSession(current); } catch (error) {
         setAuthSession(null);
         console.warn('Auth refresh failed:', error);
         return null;
       }
+    }
+
+    async function loadProfiles() {
+      if (!backendEnabled()) return false;
+      const response = await fetch(`${backendConfig.apiBase || '/api'}/profiles`, { headers: { authorization: `Bearer ${backendConfig.token}` } });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.message || payload.error || `成員資料載入失敗 (${response.status})`);
+      remoteProfiles = payload.profiles || [];
+      const me = readAuthSession()?.user?.id || readAuthSession()?.user?.sub;
+      currentProfile = remoteProfiles.find(profile => profile.id === me) || null;
+      if (!currentProfile) throw new Error('目前帳號尚未建立研究室成員 profile，請請管理者設定。');
+      appData.members = remoteProfiles.map(profile => ({ id: profile.member_code, name: profile.display_name || profile.email, role: profile.role, userId: profile.id, email: profile.email }));
+      setAuthSession(readAuthSession());
+      return true;
     }
 
     function setSyncStatus(text, state = 'local') {
@@ -3750,6 +3797,11 @@ td.sticky-col {
 
     // Field Updaters
     function updateTableField(studyType, rowIndex, field, value) {
+      if (backendEnabled() && !isAdmin() && !canManageStudies() && field.endsWith('Owner') && value !== currentMemberCode()) {
+        alert('研究人員只能修改自己負責的項目。');
+        renderAll();
+        return;
+      }
       appData[studyType][rowIndex][field] = value;
       saveData();
       renderAll();
@@ -3820,6 +3872,11 @@ td.sticky-col {
     }
 
     function updateCustomItem(studyIdx, subIdx, mKey, field, value) {
+      if (backendEnabled() && !isAdmin() && !canManageStudies() && field === 'owner' && value !== currentMemberCode()) {
+        alert('研究人員只能修改自己負責的項目。');
+        renderAll();
+        return;
+      }
       const sub = appData.customStudies[studyIdx].subjects[subIdx];
       if (!sub.items[mKey]) sub.items[mKey] = { date: '', owner: '', done: false };
       sub.items[mKey][field] = value;
@@ -3867,6 +3924,10 @@ td.sticky-col {
 
     // Modals
     function openAddSubjectModal(defaultStudy) {
+      if (backendEnabled() && !canAddSubjects()) {
+        alert('目前帳號尚未具備新增個案權限，請確認是否已由管理者啟用角色。');
+        return;
+      }
       const modal = document.getElementById('addSubjectModal');
       const select = document.getElementById('newSubStudy');
       if (defaultStudy) select.value = defaultStudy;
@@ -3887,6 +3948,10 @@ td.sticky-col {
 
     // ====== MEMBER MANAGEMENT LOGIC ======
     function openManageMembersModal() {
+      if (backendEnabled() && !isAdmin()) {
+        alert('只有管理者可以管理研究室人員帳號。');
+        return;
+      }
       renderMemberListTable();
       document.getElementById('manageMembersModal').classList.add('open');
     }
@@ -3953,12 +4018,16 @@ td.sticky-col {
     }
 
     function openCreateStudyModal() {
+      if (backendEnabled() && !canManageStudies()) {
+        alert('目前角色只能查看與更新自己負責的時程，無法建立研究案。');
+        return;
+      }
       document.getElementById('editStudyIndex').value = '-1';
       document.getElementById('studyConfigModalTitle').textContent = '＋ 新增實驗室研究案與設定追蹤時間點';
       document.getElementById('studyCodeInput').value = '';
       document.getElementById('studyDescInput').value = '';
       document.getElementById('studyCodeInput').readOnly = false;
-      populateStudyOwnerSelect('studyDefaultOwnerSelect', (appData.members && appData.members[0] ? appData.members[0].id : 'DEMO-A'));
+      populateStudyOwnerSelect('studyDefaultOwnerSelect', currentMemberCode() || (appData.members && appData.members[0] ? appData.members[0].id : 'DEMO-A'));
       applyMilestonePreset('1M_3M_6M');
       document.getElementById('studyConfigModal').classList.add('open');
     }
@@ -4112,8 +4181,20 @@ td.sticky-col {
            if (configResponse.ok) Object.assign(authConfig, await configResponse.json());
          } catch (error) { console.warn('Auth config unavailable:', error); }
        }
+       if (!authConfig.supabaseUrl) {
+         authConfig.supabaseUrl = 'https://bhgitdpvhjjgkasilniy.supabase.co';
+         authConfig.anonKey = 'sb_publishable_J-9ED4Oh5lSSnwuoKJrDWA_OTEID4o7';
+       }
        const savedSession = await ensureAuthSession();
-       if (savedSession) setAuthSession(savedSession);
+       if (savedSession) {
+         setAuthSession(savedSession);
+         try {
+           await loadProfiles();
+         } catch (error) {
+           setSyncStatus(error.message, 'error');
+           console.warn('Profile loading failed:', error);
+         }
+       }
        const authButton = document.getElementById('authButton');
        if (authButton) authButton.addEventListener('click', () => {
          if (readAuthSession()) {
@@ -4134,6 +4215,7 @@ td.sticky-col {
              password: document.getElementById('authPassword').value
            });
            setAuthSession(session);
+            await loadProfiles();
            closeModal('authModal');
            await syncFromBackend();
            renderAll();
@@ -4321,11 +4403,14 @@ td.sticky-col {
       });
 
       // Add Member Form Submit
-      document.getElementById('addMemberForm').addEventListener('submit', (e) => {
+      document.getElementById('addMemberForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (backendEnabled() && !isAdmin()) return alert('只有管理者可以管理人員帳號。');
         const id = document.getElementById('newMemId').value.trim();
         const name = document.getElementById('newMemName').value.trim() || id;
         const role = document.getElementById('newMemRole').value.trim() || '研究團隊成員';
+        const email = document.getElementById('newMemEmail')?.value.trim();
+        const userId = document.getElementById('newMemUserId')?.value.trim();
 
         if (!id) return;
         if (!appData.members) appData.members = [];
@@ -4335,13 +4420,42 @@ td.sticky-col {
           return;
         }
 
-        appData.members.push({ id, name, role });
+        if (backendEnabled()) {
+          if (!email) return alert('請填寫登入 Email。');
+          const payload = {
+            email,
+            display_name: name,
+            member_code: id,
+            role: document.getElementById('newMemRole').value,
+            active: true
+          };
+          if (userId) payload.id = userId;
+          const password = document.getElementById('newMemPassword')?.value.trim();
+          if (password) payload.password = password;
+
+          const response = await fetch(`${backendConfig.apiBase || '/api'}/profiles`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', authorization: `Bearer ${backendConfig.token}` },
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) {
+            const errPayload = await response.json().catch(() => ({}));
+            return alert(errPayload.message || errPayload.error || '新增成員帳號失敗。');
+          }
+          await loadProfiles();
+        } else {
+          appData.members.push({ id, name, role });
+        }
         saveData();
+        if (document.getElementById('newMemEmail')) document.getElementById('newMemEmail').value = '';
+        if (document.getElementById('newMemUserId')) document.getElementById('newMemUserId').value = '';
+        if (document.getElementById('newMemPassword')) document.getElementById('newMemPassword').value = '';
         document.getElementById('newMemId').value = '';
         document.getElementById('newMemName').value = '';
-        document.getElementById('newMemRole').value = '';
+        document.getElementById('newMemRole').value = 'researcher';
         renderMemberListTable();
         renderAll();
+        alert(`成員「${id} (${name})」已成功加入研究室名冊！`);
       });
 
       // Study Config Form Submit (Create or Edit Study & Milestones)

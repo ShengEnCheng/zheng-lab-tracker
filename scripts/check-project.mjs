@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 
 const required = [
   'index.html', 'initial-data.json', 'package.json', 'vercel.json', '.env.example',
-  'api/health.js', 'api/config.js', 'api/data.js', 'api/import.js', 'api/restore.js', 'api/backup.js', 'api/backups.js',
+  'api/health.js', 'api/config.js', 'api/data.js', 'api/import.js', 'api/restore.js', 'api/backup.js', 'api/backups.js', 'api/profile.js', 'api/profiles.js',
   'supabase/migrations/001_lab_state.sql'
 ];
 for (const file of required) {
@@ -28,7 +28,7 @@ const checks = {
 };
 for (const [name, ok] of Object.entries(checks)) console.log(`${ok ? '✓' : '✗'} ${name}`);
 if (Object.values(checks).some(ok => !ok)) process.exit(1);
-for (const file of ['api/_supabase.js', 'api/health.js', 'api/config.js', 'api/data.js', 'api/import.js', 'api/restore.js', 'api/backup.js', 'api/backups.js', 'src/lib/data-store.js', 'src/lib/schema.js', 'src/lib/auth-client.js']) {
+for (const file of ['api/_supabase.js', 'api/health.js', 'api/config.js', 'api/data.js', 'api/import.js', 'api/restore.js', 'api/backup.js', 'api/backups.js', 'api/profile.js', 'api/profiles.js', 'src/lib/data-store.js', 'src/lib/schema.js', 'src/lib/auth-client.js']) {
   const result = spawnSync(process.execPath, ['--check', file], { encoding: 'utf8' });
   if (result.status !== 0) {
     process.stderr.write(result.stderr || 'JavaScript syntax check failed\n');

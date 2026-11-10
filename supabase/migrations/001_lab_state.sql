@@ -12,11 +12,15 @@ create table if not exists public.lab_profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text not null unique,
   display_name text,
+  member_code text not null default '',
   role public.lab_role not null default 'researcher',
   active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.lab_profiles add column if not exists member_code text not null default '';
+create unique index if not exists lab_profiles_member_code_key on public.lab_profiles (lower(member_code)) where member_code <> '';
 
 create table if not exists public.lab_state (
   id integer primary key check (id = 1),
@@ -84,7 +88,18 @@ $$;
 drop policy if exists "active users can read profile" on public.lab_profiles;
 create policy "active users can read profile"
 on public.lab_profiles for select
-using (id = auth.uid() or public.current_lab_role() in ('admin', 'backup_admin'));
+using (public.can_use_lab_data());
+
+drop policy if exists "admins can insert profile" on public.lab_profiles;
+create policy "admins can insert profile"
+on public.lab_profiles for insert
+with check (public.current_lab_role() in ('admin', 'backup_admin'));
+
+drop policy if exists "admins can update profile" on public.lab_profiles;
+create policy "admins can update profile"
+on public.lab_profiles for update
+using (public.current_lab_role() in ('admin', 'backup_admin'))
+with check (public.current_lab_role() in ('admin', 'backup_admin'));
 
 drop policy if exists "active users can read state" on public.lab_state;
 create policy "active users can read state"
