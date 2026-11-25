@@ -1,7 +1,10 @@
 import { readFile } from 'node:fs/promises';
 
 const envPath = '.env.local';
-const sqlPath = 'supabase/migrations/001_lab_state.sql';
+// 預設只跑 001；要套用其他 migration 就傳檔名，例如
+//   node scripts/run-supabase-migration.mjs 002_repair_backup_kind.sql
+const requested = process.argv[2] || '001_lab_state.sql';
+const sqlPath = requested.includes('/') ? requested : `supabase/migrations/${requested}`;
 const envText = await readFile(envPath, 'utf8');
 const env = Object.fromEntries(envText.split(/\r?\n/)
   .filter(line => line.trim() && !line.trim().startsWith('#'))
