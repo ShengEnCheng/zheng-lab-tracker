@@ -397,7 +397,7 @@ for (const [name, scenario] of Object.entries(SCENARIOS)) {
   let dom;
   try {
     dom = execFileSync(CHROME, [
-      '--headless=old', '--disable-gpu', '--no-sandbox', '--window-size=1440,900',
+      '--headless=old', '--disable-gpu', '--no-sandbox', `--user-data-dir=${join(dir, 'profile')}`, '--window-size=1440,900',
       '--virtual-time-budget=25000', '--dump-dom', `file://${pagePath}`
     ], { encoding: 'utf8', timeout: 90000, maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
   } finally {
