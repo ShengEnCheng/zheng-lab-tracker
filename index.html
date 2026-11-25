@@ -2857,6 +2857,15 @@ td.sticky-col {
           const who = currentProfile?.display_name || currentProfile?.email || '目前帳號';
           text.textContent = `${who} 登入中，所有修改都會自動存進共用資料庫，同事登入後就看得到。`;
         }
+      } else if (kind === 'empty-local') {
+        // 未登入、這台電腦也沒有任何資料 → 畫面全空。
+        // 以前這裡完全不顯示任何東西，使用者只看到一片空白，不知道是
+        // 「資料不見了」還是「本來就沒有」，也不知道下一步要做什麼。
+        if (icon) icon.textContent = '👋';
+        if (title) title.textContent = '這個瀏覽器上還沒有資料';
+        if (text) {
+          text.textContent = '如果之前已經輸入過資料，那是存在別的裝置或瀏覽器裡。請先登入查看共用資料庫的內容；如果這是全新的研究室，登入後就可以開始建立。';
+        }
       } else {
         banner.hidden = true;
       }

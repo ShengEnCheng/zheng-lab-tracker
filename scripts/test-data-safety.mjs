@@ -87,6 +87,20 @@ const SCENARIOS = {
     `,
     remoteData: EMPTY_REMOTE_DATA
   },
+  'signed-out-empty-local': {
+    title: '未登入 + 這台電腦也沒有資料（畫面全空）',
+    setup: `
+      // 這是使用者瀏覽器裡實際的狀態：登入過，但資料庫是空的，
+      // 本機存的也是空的。以前這裡什麼都不顯示，使用者只看到空白。
+      localStorage.setItem(TEST_STORAGE_KEY, ${JSON.stringify(JSON.stringify({
+        schemaVersion: 1,
+        members: [{ id: 'admin', name: 'admin', role: 'admin', email: 'admin@cgu.edu.tw' }],
+        optBone: [],
+        music40: [],
+        customStudies: []
+      }))});
+    `
+  },
   'signed-in-remote-has-data': {
     title: '已登入 + 共用資料庫已有資料（名冊要跟著重建）',
     setup: `
@@ -318,6 +332,19 @@ window.addEventListener('load', () => setTimeout(async () => {
     check('按「存進共用資料庫」會真的把資料送上傳', () =>
       window.__dataRequests.some(r => r.method === 'POST' && r.url.includes('/api/data')));
     check('上傳成功後 pendingLocalUpload 被清掉', () => pendingLocalUpload === false);
+  }
+
+  if (SCENARIO === 'signed-out-empty-local') {
+    // 這是使用者實際遇到的狀態：有 localStorage 但裡面是空的，
+    // 以前橫幅直接隱藏，整頁空白，分不出「資料不見了」還是「本來就沒有」。
+    check('畫面不會一片空白（橫幅有出現）', () => bannerVisible());
+    check('橫幅標成「這個瀏覽器上還沒有資料」', () => bannerKind() === 'empty-local');
+    check('橫幅文字說明還沒登入', () => /這個瀏覽器上還沒有資料/.test(titleText()));
+    check('橫幅說明資料可能在別的裝置', () => /別的裝置|瀏覽器/.test(bodyText()));
+    check('橫幅提供登入按鈕', () => visibleBtn('bannerAuthBtn'));
+    check('空的本機資料不會被當成示範資料', () => isDemoData() === false);
+    check('沒有資料時不該顯示個案列', () =>
+      document.querySelectorAll('#actionTableBody tr').length <= 1);
   }
 
   if (SCENARIO === 'signed-in-remote-has-data') {
