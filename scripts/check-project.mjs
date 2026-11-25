@@ -24,7 +24,15 @@ const checks = {
   'backup integrity checksum': migration.includes('jsonb_sha256') && migration.includes('backup_integrity_failed'),
   'backup health tracking': migration.includes('lab_backup_runs'),
   'login UI': html.includes('id="authForm"') && html.includes('id="authButton"'),
-  'session refresh': html.includes('refreshAuthSession') && html.includes('grant_type=refresh_token')
+  'session refresh': html.includes('refreshAuthSession') && html.includes('grant_type=refresh_token'),
+  // 這三項是為了避免「資料看起來不見了」而加的保護。任何一項被移除，
+  // 使用者都可能再遇到：把示範資料當真資料、未登入輸入的資料無聲消失。
+  'demo data banner': html.includes('id="dataStateBanner"') && html.includes('function isDemoData()'),
+  'read-only when signed out': html.includes('function isReadOnly()') && html.includes('function promptLoginForEdit()'),
+  // 名冊存在 Auth 帳號 + lab_profiles，不在 lab_state.data 裡。
+  // 整份覆蓋 appData 之後一定要重建，否則負責人下拉選單變空的。
+  'roster rebuilt after sync': html.includes('function rosterFromProfiles()') && html.includes('appData.members = rosterFromProfiles()'),
+  'no silent local overwrite': html.includes('function confirmDiscardLocalData(') && html.includes('pendingLocalUpload')
 };
 for (const [name, ok] of Object.entries(checks)) console.log(`${ok ? '✓' : '✗'} ${name}`);
 if (Object.values(checks).some(ok => !ok)) process.exit(1);

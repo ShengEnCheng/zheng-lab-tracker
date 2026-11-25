@@ -1643,8 +1643,102 @@ td.sticky-col {
       }
     }
 
+    /* ------------------------------------------------------------------
+       資料狀態橫幅（示範資料／尚未登入／本機未同步）
+       以前這三種狀態在畫面上完全看不出來，使用者會把示範資料當成真資料，
+       在沒登入的情況下輸入一整天的資料，一登入就被後端資料整份蓋掉。
+       ------------------------------------------------------------------ */
+    .data-state-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 0 0 14px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .data-state-banner[hidden] { display: none; }
+    /* 按鈕自己有 display: inline-flex，會蓋掉瀏覽器預設的 [hidden] { display:none }，
+       所以這裡要明講 —— 否則「這個狀態不該出現的按鈕」還是會畫出來。 */
+    .data-state-banner [hidden] { display: none !important; }
+
+    .data-state-banner .banner-icon {
+      flex: 0 0 auto;
+      font-size: 17px;
+      line-height: 1.35;
+    }
+
+    .data-state-banner .banner-body { flex: 1 1 auto; min-width: 0; }
+
+    .data-state-banner .banner-title {
+      font-weight: 750;
+      font-size: 13.5px;
+      margin-bottom: 2px;
+    }
+
+    .data-state-banner .banner-text { color: inherit; opacity: .92; }
+
+    .data-state-banner .banner-actions {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 4px;
+      align-self: center;
+    }
+
+    /* 示範資料：最強烈的提示，因為這是最容易被誤認成真資料的狀態 */
+    .data-state-banner[data-kind="demo"] {
+      background: #fff4e5;
+      border-color: #f0b45c;
+      color: #6b3d00;
+    }
+
+    /* 尚未登入 + 有本機資料：資料可能還沒同步上去 */
+    .data-state-banner[data-kind="local-only"] {
+      background: #fff8e1;
+      border-color: #e8c547;
+      color: #6a5200;
+    }
+
+    /* 已登入，但畫面是本機資料、還沒上傳到共用資料庫 */
+    .data-state-banner[data-kind="pending-upload"] {
+      background: #f3f0ff;
+      border-color: #b9a7ee;
+      color: #3b2a7a;
+    }
+
+    /* 已經登入並且在同步後端：只是提醒目前在看共享資料 */
+    .data-state-banner[data-kind="remote"] {
+      background: #eef6ff;
+      border-color: #a9c9ee;
+      color: #1c3f66;
+    }
+
+    .data-state-banner[data-kind="demo"] .btn { border-color: #d99a3f; color: #6b3d00; }
+
+    @media (max-width: 900px) {
+      .data-state-banner { flex-wrap: wrap; }
+      .data-state-banner .banner-actions { margin-left: 29px; }
+    }
+
+    /* 唯讀模式（未登入且後端已啟用）：所有編輯入口一律視覺上不可用，
+       並明確說明原因，而不是讓使用者輸入後才發現資料沒送出去。 */
+    body.read-only-mode .btn-group-primary .btn,
+    body.read-only-mode #addSubjectForm button[type="submit"],
+    body.read-only-mode #addStudyForm button[type="submit"],
+    body.read-only-mode .row-edit-btn,
+    body.read-only-mode .row-delete-btn {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
     @media print {
-      .app-header, .filter-bar, .view-tabs, .btn, .summary-action-badge { display: none !important; }
+      .app-header, .filter-bar, .view-tabs, .btn, .summary-action-badge,
+      .data-state-banner { display: none !important; }
       body { background: #fff; }
       .panel { border: 1px solid #ddd; box-shadow: none; }
       .table-wrap { max-height: none; overflow: visible; }
@@ -1693,6 +1787,24 @@ td.sticky-col {
   </header>
 
   <main>
+    <!-- 資料狀態橫幅：讓「示範資料／尚未登入／已同步」在畫面上分得清楚 -->
+    <div class="data-state-banner" id="dataStateBanner" data-kind="demo" role="status" aria-live="polite" hidden>
+      <span class="banner-icon" id="dataStateIcon" aria-hidden="true">⚠️</span>
+      <div class="banner-body">
+        <div class="banner-title" id="dataStateTitle">目前顯示的是示範資料</div>
+        <div class="banner-text" id="dataStateText">
+          這些個案（DEMO-01、DEMO-…）與 2099 年的日期都是系統內建的示範資料，不是你的研究資料。
+        </div>
+      </div>
+      <div class="banner-actions">
+        <button class="btn btn-secondary btn-xs" id="bannerUploadBtn" type="button" hidden>↑ 存進共用資料庫</button>
+        <button class="btn btn-secondary btn-xs" id="bannerExportBtn" type="button" hidden>⭳ 先匯出備份</button>
+        <button class="btn btn-secondary btn-xs" id="bannerAuthBtn" type="button">登入以查看真實資料</button>
+        <button class="btn btn-secondary btn-xs" id="bannerClearLocalBtn" type="button" hidden>清除本機資料</button>
+        <button class="btn btn-secondary btn-xs" id="bannerDismissBtn" type="button" title="暫時隱藏這個提醒">知道了</button>
+      </div>
+    </div>
+
     <!-- Global filter toolbar -->
     <section class="filter-bar" aria-label="全域篩選條件">
       <div class="filter-group">
@@ -2613,10 +2725,191 @@ td.sticky-col {
       if (pill) pill.dataset.state = state;
     }
 
+    // ------------------------------------------------------------------
+    // 資料狀態：示範資料 / 只有本機資料 / 已連上共用資料庫
+    //
+    // 為什麼需要這個：以前沒登入且瀏覽器沒存過資料時，畫面直接顯示 65 筆
+    // 內建示範個案（成員 DEMO-A~E、日期全是 2099 年），而且完全沒有標示。
+    // 使用者會把它當成自己的資料開始編輯 —— 那些編輯只存在瀏覽器裡，
+    // 一旦登入，syncFromBackend() 就用資料庫內容整份覆蓋 appData，
+    // 剛輸入的東西無聲消失。這裡把三種狀態明確區分出來。
+    // ------------------------------------------------------------------
+
+    // 系統內建的示範資料特徵：成員代號 DEMO-x、日期在 2099 年。
+    function looksLikeDemoRow(row) {
+      const text = JSON.stringify(row || {});
+      return /"DEMO-[A-Z0-9]/.test(text) || /2099-\d\d-\d\d/.test(text);
+    }
+
+    function isDemoData() {
+      const rows = [].concat(appData.optBone || [], appData.music40 || []);
+      (appData.customStudies || []).forEach(study => {
+        (study.subjects || []).forEach(subject => rows.push(subject));
+      });
+      if (rows.length === 0) return false;
+      return rows.every(looksLikeDemoRow);
+    }
+
+    function hasAnyData() {
+      const custom = (appData.customStudies || []).reduce((n, study) => n + (study.subjects || []).length, 0);
+      return (appData.optBone || []).length + (appData.music40 || []).length + custom > 0;
+    }
+
+    // 目前畫面內容的來源：'demo' | 'local-only' | 'pending-upload' | 'remote-empty' | 'remote'
+    function dataStateKind() {
+      if (backendEnabled() && currentProfile) {
+        if (pendingLocalUpload) return 'pending-upload';
+        if (!hasAnyData()) return 'remote-empty';
+        return isDemoData() ? 'demo' : 'remote';
+      }
+      if (isDemoData()) return 'demo';
+      return hasAnyData() ? 'local-only' : 'empty-local';
+    }
+
+    // 未登入時是否禁止編輯。
+    //
+    // 為什麼要鎖：這個系統的資料唯一真實來源是共用資料庫。未登入時所有修改
+    // 只寫進這台電腦的瀏覽器 —— 換裝置、清快取，或下次登入同步時就被覆蓋。
+    // 使用者就是這樣把一整天的輸入弄丟的。
+    //
+    // 只鎖「已經部署在網站上」的情況（http / https）。直接雙擊本機檔案開啟
+    // （file://）時沒有伺服器可存，本來就只能存在瀏覽器裡，鎖住等於完全不能
+    // 用，所以允許編輯，只靠橫幅提醒。
+    const dataSafetyConfig = window.__ZHENG_LAB_DATA_SAFETY__ || {};
+
+    function originIsDeployed(protocol) {
+      // dataSafetyConfig.protocol 只給測試用：headless Chrome 在這台機器上
+      // 連不上 http://127.0.0.1（ETIMEDOUT），所以測試用 file:// 開頁面，
+      // 再假裝網址是 https 來驗證部署後的行為。
+      const value = protocol || dataSafetyConfig.protocol
+        || (typeof location !== 'undefined' ? location.protocol : '');
+      return /^https?:$/.test(String(value));
+    }
+
+    function isReadOnly() {
+      if (currentProfile) return false;
+      return originIsDeployed();
+    }
+
+    let bannerDismissed = false;
+
+    function renderDataStateBanner() {
+      const banner = document.getElementById('dataStateBanner');
+      if (!banner) return;
+
+      const kind = dataStateKind();
+      // 「只有本機資料」不能按知道了就消失 —— 那正是最危險的狀態。
+      if (bannerDismissed && kind !== 'local-only') {
+        banner.hidden = true;
+        return;
+      }
+
+      const icon = document.getElementById('dataStateIcon');
+      const title = document.getElementById('dataStateTitle');
+      const text = document.getElementById('dataStateText');
+      const authBtn = document.getElementById('bannerAuthBtn');
+      const clearBtn = document.getElementById('bannerClearLocalBtn');
+      const dismissBtn = document.getElementById('bannerDismissBtn');
+      const uploadBtn = document.getElementById('bannerUploadBtn');
+      const exportBtn = document.getElementById('bannerExportBtn');
+
+      banner.dataset.kind = kind;
+      banner.hidden = false;
+      if (authBtn) {
+        authBtn.hidden = !!currentProfile;
+        authBtn.textContent = kind === 'demo' ? '登入以查看真實資料' : '登入';
+      }
+      if (dismissBtn) dismissBtn.hidden = kind === 'local-only' || kind === 'pending-upload' || kind === 'remote-empty';
+      if (uploadBtn) uploadBtn.hidden = kind !== 'pending-upload';
+      if (exportBtn) exportBtn.hidden = !(kind === 'pending-upload' || kind === 'local-only');
+      if (clearBtn) clearBtn.hidden = !(kind === 'local-only' || kind === 'demo');
+
+      if (kind === 'demo') {
+        if (icon) icon.textContent = '⚠️';
+        if (title) title.textContent = '目前顯示的是示範資料，不是你的研究資料';
+        if (text) {
+          text.textContent = currentProfile
+            ? '共用資料庫裡目前沒有任何個案，所以畫面顯示系統內建的示範資料。開始新增個案後，這裡就會換成真實資料。'
+            : '這些個案（DEMO-01、DEMO-…）和 2099 年的日期都是系統內建的示範資料。你現在還沒登入，在這裡做的修改不會存進共用資料庫。';
+        }
+      } else if (kind === 'local-only') {
+        if (icon) icon.textContent = '🔒';
+        if (title) title.textContent = '這些資料只存在這台電腦的瀏覽器裡，還沒存進共用資料庫';
+        if (text) {
+          text.textContent = '你還沒登入，目前的修改不會存進共用資料庫，也不會同步給其他人。請先匯出備份或登入，否則換一台電腦就看不到這些資料。';
+        }
+      } else if (kind === 'pending-upload') {
+        if (icon) icon.textContent = '⇧';
+        if (title) title.textContent = `這台電腦有 ${countLocalRows()} 筆資料還沒存進共用資料庫`;
+        if (text) {
+          text.textContent = '你已經登入了，但畫面顯示的是這台電腦原本的資料（沒有被共用資料庫的內容蓋掉）。請先按「先匯出備份」保存一份，再按「存進共用資料庫」上傳。';
+        }
+      } else if (kind === 'remote-empty') {
+        if (icon) icon.textContent = '☁️';
+        if (title) title.textContent = '共用資料庫目前是空的，這是正常的起始狀態';
+        if (text) {
+          text.textContent = '你已經登入，共用資料庫裡還沒有任何個案。按「＋ 新增個案」或「⭱ 匯入」就可以開始建立資料。';
+        }
+      } else if (kind === 'remote') {
+        if (icon) icon.textContent = '☁️';
+        if (title) title.textContent = '已連上共用資料庫';
+        if (text) {
+          const who = currentProfile?.display_name || currentProfile?.email || '目前帳號';
+          text.textContent = `${who} 登入中，所有修改都會自動存進共用資料庫，同事登入後就看得到。`;
+        }
+      } else {
+        banner.hidden = true;
+      }
+    }
+
+    function applyReadOnlyMode() {
+      const readOnly = isReadOnly();
+      document.body.classList.toggle('read-only-mode', readOnly);
+
+      // 唯讀時把編輯入口的行為換成「先登入」的說明，而不是讓使用者填完才發現存不進去。
+      const guarded = ['openAddSubjectBtn', 'openAddStudyBtn', 'openManageMembersBtn'];
+      guarded.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.dataset.readOnlyGuarded = readOnly ? '1' : '';
+        el.title = readOnly ? '請先登入才能修改資料' : (el.dataset.originalTitle || '');
+      });
+    }
+
+    function promptLoginForEdit() {
+      const ok = confirm('這台電腦還沒登入，現在做的修改不會存進共用資料庫。\n\n要先登入嗎？');
+      if (ok) document.getElementById('authModal')?.classList.add('open');
+      return false;
+    }
+
     function persistedDataSnapshot() {
       const persisted = JSON.parse(JSON.stringify(appData));
       delete persisted.refDate;
       return persisted;
+    }
+
+    // 空白的資料集（沒有任何個案）。共用資料庫真的空的時候用它，
+    // 而不是退回示範資料 —— 這樣「沒有資料」跟「忘了登入」就分得開。
+    // 名冊要從 lab_profiles（真正有帳號的人）重建，不能沿用資料檔裡的字串。
+    function rosterFromProfiles() {
+      return (remoteProfiles || []).map(profile => ({
+        id: profile.member_code,
+        name: profile.display_name || profile.email,
+        role: profile.role,
+        userId: profile.id,
+        email: profile.email
+      }));
+    }
+
+    function buildEmptyAppData() {
+      return {
+        refDate: getTodayISO(),
+        members: rosterFromProfiles(),
+        optBone: [],
+        music40: [],
+        customStudies: [],
+        schemaVersion: 1
+      };
     }
 
     async function syncFromBackend() {
@@ -2631,9 +2924,25 @@ td.sticky-col {
         const payload = await response.json();
         if (!response.ok) throw new Error(payload.message || payload.error || `同步失敗 (${response.status})`);
         if (!payload.data || !Array.isArray(payload.data.optBone) || !Array.isArray(payload.data.music40)) throw new Error('後端資料格式不符');
+
+        // 登入前如果這台電腦已經有一份「跟共用資料庫不一樣」的資料，
+        // 直接覆蓋就等於無聲刪掉使用者剛剛輸入的東西。先問清楚。
+        // 但要先把遠端版本號記下來，否則等一下上傳時 baseRevision 是舊的會撞版本衝突。
+        if (!confirmDiscardLocalData(payload.data)) {
+          remoteRevision = Number(payload.revision || 0);
+          setSyncStatus('已保留本機資料', 'local');
+          return false;
+        }
+
         appData = payload.data;
         remoteRevision = Number(payload.revision || 0);
         appData.refDate = getTodayISO();
+        if (!Array.isArray(appData.customStudies)) appData.customStudies = [];
+        // 共用資料庫的內容裡沒有成員名冊（那是 Auth 帳號 + lab_profiles 的事），
+        // 整份覆蓋後名冊會消失，負責人下拉選單就變空的。同步完立刻重建。
+        if (remoteProfiles.length > 0) appData.members = rosterFromProfiles();
+        // 共用資料庫真的空的時候，不要退回示範資料 —— 那會被誤認成真資料。
+        if (!hasAnyData()) appData = buildEmptyAppData();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(persistedDataSnapshot()));
         setSyncStatus(`已同步 rev.${remoteRevision}`, 'remote');
         return true;
@@ -2644,10 +2953,59 @@ td.sticky-col {
       }
     }
 
-    async function syncToBackend() {
+    // 本機有一份「看起來像使用者自己輸入的」資料時，不要讓登入無聲蓋掉它。
+    // 回傳 true = 可以覆蓋（繼續同步）；false = 保留本機資料。
+    let pendingLocalUpload = false;
+
+    function confirmDiscardLocalData(remoteData) {
+      if (isDemoData()) return true;              // 示範資料沒有保留價值
+      if (!hasAnyData()) return true;             // 本機本來就沒東西
+
+      const rows = countLocalRows();
+      const remoteEmpty = !remoteData
+        || ((remoteData.optBone || []).length === 0 && (remoteData.music40 || []).length === 0
+            && (remoteData.customStudies || []).length === 0);
+
+      if (remoteEmpty) {
+        // 共用資料庫是空的，這台電腦卻有資料 → 一定不能蓋掉。
+        // 保留在畫面上，並標記成「待上傳」，讓使用者自己決定什麼時候存上去。
+        pendingLocalUpload = true;
+        return false;
+      }
+
+      // 兩邊都有資料 → 這才是真的需要使用者決定的情況。
+      return confirm('這台電腦上有 ' + rows + ' 筆還沒同步的資料，共用資料庫裡也已經有資料。\n\n按「確定」：用共用資料庫的內容覆蓋這台電腦（本機資料不會自動備份）。\n按「取消」：保留這台電腦的資料，先不同步。\n\n建議先按「⭳ 匯出」備份這台電腦的資料。');
+    }
+
+    function countLocalRows() {
+      const custom = (appData.customStudies || []).reduce((n, study) => n + (study.subjects || []).length, 0);
+      return (appData.optBone || []).length + (appData.music40 || []).length + custom;
+    }
+
+    // 把「待上傳」的本機資料存進共用資料庫。由使用者明確按下按鈕才會做。
+    async function uploadPendingLocalData() {
+      if (!backendEnabled() || !currentProfile) {
+        alert('請先登入，才能把資料存進共用資料庫。');
+        return false;
+      }
+      const rows = countLocalRows();
+      const ok = confirm('要把這台電腦上的 ' + rows + ' 筆資料存進共用資料庫嗎？\n\n存進去之後，同事登入就看得到。');
+      if (!ok) return false;
+      await syncToBackend(true);
+      if (pendingLocalUpload) return false;
+      renderAll();
+      return true;
+    }
+
+    async function syncToBackend(forceUpload) {
        const refreshedSession = await ensureAuthSession();
        if (refreshedSession?.access_token) backendConfig.token = refreshedSession.access_token;
       if (!backendEnabled()) return;
+      // 沒登入就沒有可寫入的身分 —— 不要假裝存好了。
+      if (!currentProfile) {
+        setSyncStatus('尚未登入，資料只存在本機', 'local');
+        return;
+      }
       const requestId = crypto.randomUUID ? crypto.randomUUID() : `req-${Date.now()}`;
       setSyncStatus('儲存同步中…', 'syncing');
       try {
@@ -2664,7 +3022,9 @@ td.sticky-col {
         }
         if (!response.ok) throw new Error(payload.message || payload.error || `儲存失敗 (${response.status})`);
         remoteRevision = Number(payload.revision || remoteRevision);
+        pendingLocalUpload = false;
         setSyncStatus(`已同步 rev.${remoteRevision}`, 'remote');
+        renderDataStateBanner();
       } catch (error) {
         setSyncStatus('同步失敗，資料留在本機', 'error');
         console.error('Backend save failed:', error);
@@ -2673,6 +3033,9 @@ td.sticky-col {
 
     function queueRemoteSave() {
       if (!backendEnabled()) return;
+      // 本機有一份還沒上傳的資料時，不要因為使用者隨便改一格就自動整份上傳。
+      // 上傳要由使用者自己按「存進共用資料庫」決定。
+      if (pendingLocalUpload) return;
       clearTimeout(remoteSaveTimer);
       remoteSaveTimer = setTimeout(() => { syncToBackend(); }, 350);
     }
@@ -3202,6 +3565,8 @@ td.sticky-col {
       renderMusic40Table(allTasks, studentFilter, studyFilter, statusFilter, keyword);
       renderCustomStudies(allTasks, studentFilter, studyFilter, statusFilter, keyword);
       updateManagementStudyVisibility(studyFilter);
+      renderDataStateBanner();
+      applyReadOnlyMode();
     }
 
     function escapeHtml(str) {
@@ -3349,6 +3714,11 @@ td.sticky-col {
     }
 
     function toggleTaskDone(studyType, studyIndex, rowIndex, doneFieldOrKey) {
+      // 未登入時打勾只會存在這台電腦，重新整理或換裝置就不見 —— 先擋下來。
+      if (isReadOnly()) {
+        promptLoginForEdit();
+        return;
+      }
       if (studyType === 'optBone') {
         appData.optBone[rowIndex][doneFieldOrKey] = !appData.optBone[rowIndex][doneFieldOrKey];
       } else if (studyType === 'music40') {
@@ -4323,9 +4693,41 @@ td.sticky-col {
       });
 
       // Header Buttons
-      document.getElementById('openAddSubjectBtn').addEventListener('click', () => openAddSubjectModal());
-      document.getElementById('openAddStudyBtn').addEventListener('click', () => openCreateStudyModal());
-      document.getElementById('openManageMembersBtn').addEventListener('click', () => openManageMembersModal());
+      // Header Buttons —— 未登入時先擋下來，不要讓使用者填完表單才發現存不進去
+      document.getElementById('openAddSubjectBtn').addEventListener('click', () => {
+        if (isReadOnly()) { promptLoginForEdit(); return; }
+        openAddSubjectModal();
+      });
+      document.getElementById('openAddStudyBtn').addEventListener('click', () => {
+        if (isReadOnly()) { promptLoginForEdit(); return; }
+        openCreateStudyModal();
+      });
+      document.getElementById('openManageMembersBtn').addEventListener('click', () => {
+        if (isReadOnly()) { promptLoginForEdit(); return; }
+        openManageMembersModal();
+      });
+
+      // 資料狀態橫幅上的動作
+      document.getElementById('bannerAuthBtn')?.addEventListener('click', () => {
+        document.getElementById('authModal')?.classList.add('open');
+      });
+      document.getElementById('bannerUploadBtn')?.addEventListener('click', () => { uploadPendingLocalData(); });
+      document.getElementById('bannerExportBtn')?.addEventListener('click', () => {
+        downloadJsonBackup('local-backup', appData);
+      });
+      document.getElementById('bannerDismissBtn')?.addEventListener('click', () => {
+        bannerDismissed = true;
+        renderDataStateBanner();
+      });
+      document.getElementById('bannerClearLocalBtn')?.addEventListener('click', () => {
+        const ok = confirm('這會清掉這台電腦瀏覽器裡暫存的資料，改用共用資料庫的內容。\n\n如果這裡有你還沒同步上去的資料，請先按「匯出」備份再繼續。\n\n確定要清除嗎？');
+        if (!ok) return;
+        try { localStorage.removeItem(STORAGE_KEY); } catch (error) { console.warn(error); }
+        appData = backendEnabled() ? buildEmptyAppData() : getDefaultData();
+        bannerDismissed = false;
+        saveData();
+        renderAll();
+      });
 
       // Fill blank music40 questionnaire dates with corresponding evaluation dates
       document.getElementById('fillMusic40QuizDatesBtn').addEventListener('click', () => {
