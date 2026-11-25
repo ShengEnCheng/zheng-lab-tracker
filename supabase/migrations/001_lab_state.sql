@@ -53,6 +53,32 @@ create table if not exists public.lab_backups (
   kind text not null default 'scheduled' check (kind in ('scheduled', 'weekly', 'before_import', 'before_restore', 'migration'))
 );
 
+-- 約束漂移修復：create table if not exists 對已存在的表不會重新套用約束，
+-- 所以若這張表是很久以前用不同定義建出來的，kind 約束可能缺少 'weekly'
+-- （實際線上就發生過：每週日備份 insert 失敗）。這裡無條件重建一次約束，
+-- 讓 001 重跑就能自我修復。詳細說明見 002_repair_backup_kind.sql。
+do $$
+declare
+  constraint_row record;
+begin
+  for constraint_row in
+    select con.conname
+    from pg_constraint con
+    join pg_class rel on rel.oid = con.conrelid
+    join pg_namespace nsp on nsp.oid = rel.relnamespace
+    where nsp.nspname = 'public'
+      and rel.relname = 'lab_backups'
+      and con.contype = 'c'
+      and pg_get_constraintdef(con.oid) ilike '%kind%'
+  loop
+    execute format('alter table public.lab_backups drop constraint %I', constraint_row.conname);
+  end loop;
+end $$;
+
+alter table public.lab_backups
+  add constraint lab_backups_kind_check
+  check (kind in ('scheduled', 'weekly', 'before_import', 'before_restore', 'migration'));
+
 create table if not exists public.lab_backup_runs (
   id uuid primary key default gen_random_uuid(),
   kind text not null check (kind in ('scheduled', 'weekly')),

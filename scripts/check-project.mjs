@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 const required = [
   'index.html', 'initial-data.json', 'package.json', 'vercel.json', '.env.example',
   'api/health.js', 'api/config.js', 'api/data.js', 'api/import.js', 'api/restore.js', 'api/backup.js', 'api/backups.js', 'api/profile.js', 'api/profiles.js',
-  'supabase/migrations/001_lab_state.sql'
+  'supabase/migrations/001_lab_state.sql', 'supabase/migrations/002_repair_backup_kind.sql'
 ];
 for (const file of required) {
   if (!existsSync(file)) throw new Error(`缺少必要檔案：${file}`);
@@ -32,7 +32,11 @@ const checks = {
   // 名冊存在 Auth 帳號 + lab_profiles，不在 lab_state.data 裡。
   // 整份覆蓋 appData 之後一定要重建，否則負責人下拉選單變空的。
   'roster rebuilt after sync': html.includes('function rosterFromProfiles()') && html.includes('appData.members = rosterFromProfiles()'),
-  'no silent local overwrite': html.includes('function confirmDiscardLocalData(') && html.includes('pendingLocalUpload')
+  'no silent local overwrite': html.includes('function confirmDiscardLocalData(') && html.includes('pendingLocalUpload'),
+  // 線上 lab_backups 的 kind 約束曾經少了 'weekly'，讓每週日備份靜默失敗。
+  // 002 負責修復，001 也補了同一段，讓重跑 001 就能自我修復。
+  'backup kind drift repaired': migration.includes('002_repair_backup_kind') || migration.includes("drop constraint %I"),
+  'weekly kind present in repair': (await readFile('supabase/migrations/002_repair_backup_kind.sql', 'utf8')).includes("'weekly'")
 };
 for (const [name, ok] of Object.entries(checks)) console.log(`${ok ? '✓' : '✗'} ${name}`);
 if (Object.values(checks).some(ok => !ok)) process.exit(1);
